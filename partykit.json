@@ -1,0 +1,6 @@
+{
+  "$schema": "https://www.partykit.io/schema.json",
+  "name": "lorem-ipsum-game",
+  "main": "party/index.js",
+  "compatibilityDate": "2024-08-26"
+}
