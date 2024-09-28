@@ -2,7 +2,7 @@
 // Using partykit, we can create a simple server that will handle the game logic and communication with the clients.
 
 export default class WebSocketServer {
-  constructor(room) {}
+  constructor(room) {this.room = room;this.users=[];}
   // when a client sends a message
   onMessage(message, sender) {
     // send it to everyone else
@@ -10,16 +10,11 @@ export default class WebSocketServer {
   }
   // when a new client connects
   onConnect(connection) {
-    // welcome the new joiner
-    connection.send(`Welcome, ${connection.id}`);
-    // let everyone else know that a new connection joined
-    this.room.broadcast(`Heads up! ${connection.id} joined the party!`, [
-      connection.id
-    ]);
+    this.room.broadcast(['join', connection.id]);
   }
   // when a client disconnects
   onClose(connection) {
-    this.room.broadcast(`So sad! ${connection.id} left the party!`);
+    this.room.broadcast(['leave', connection.id]);
   }
 }
 

@@ -2,5 +2,12 @@
   "$schema": "https://www.partykit.io/schema.json",
   "name": "lorem-ipsum-game",
   "main": "party/index.js",
-  "compatibilityDate": "2024-08-26"
+  "compatibilityDate": "2024-08-26",
+  "serve": {
+    "path": "public",
+    "build": {
+      "entry": "src/game.js",
+      "minify": true
+    }
+  }
 }
