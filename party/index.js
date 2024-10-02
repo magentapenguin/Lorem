@@ -10,11 +10,20 @@ export default class WebSocketServer {
   }
   // when a new client connects
   onConnect(connection) {
-    this.room.broadcast(['join', connection.id]);
+    // disconnect if over capacity
+    if (this.users.length >= 3) {
+      connection.send(['full']);
+      connection.close();
+      console.log('room is full', this.users.length);
+      return;
+    }
+    this.users.push(connection);
+    this.room.broadcast(['join', connection.id], [connection.id]);
   }
   // when a client disconnects
   onClose(connection) {
-    this.room.broadcast(['leave', connection.id]);
+    this.users = this.users.filter(user => user.id !== connection.id);
+    this.room.broadcast(['leave', connection.id], [connection.id]);
   }
 }
 

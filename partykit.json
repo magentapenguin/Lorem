@@ -1,7 +1,8 @@
 {
   "$schema": "https://www.partykit.io/schema.json",
-  "name": "lorem-ipsum-game",
+  "name": "lorem-ipsum",
   "main": "party/index.js",
+  "domain": "lorem.cat5python.com",
   "compatibilityDate": "2024-08-26",
   "serve": {
     "path": "public",
