@@ -12,12 +12,34 @@ ws.addEventListener("close", () => {
 });
 
 ws.addEventListener("message", (e) => {
-    if (e.data === "full") {
-        console.warn("room is full");
-        k.debug.log("room is full");
-        return;
+    console.log(e.data);
+    const [type, ...data] = JSON.parse(e.data);
+    console.log(type, data);
+    if (type === "join") {
+        k.debug.log("joined");
     }
-    k.debug.log(e.data);
+    if (type === "leave") {
+        k.debug.log("left");
+    }
+    if (type === "move") {
+        altplayer.pos = data[0];
+    }
+    if (type === "angle") {
+        angleGun(altgun, altplayer, false);
+    }
+    if (type === "fire") {
+        const b = bullets.add([
+            k.pos(data[0]),
+            k.anchor("center"),
+            k.rotate(data[1]),
+            k.area(),
+            k.move(data[1], 400),
+            k.offscreen({ destroy: true }),
+            k.color(64, 64, 64),
+            k.rect(12, 5, { radius: 2 }),
+            "bullet-remote",
+        ]);
+    }
 });
 
 const k = kaplay({
@@ -41,7 +63,7 @@ const k = kaplay({
             gamepad: "buttonA",
         },
     },
-    
+
     background: [255, 255, 255],
 });
 
@@ -98,6 +120,21 @@ const gun = player.add([
     k.area(),
 ]);
 
+const altplayer = k.add([
+    k.sprite("bean"),
+    k.pos(k.width() - 70, k.height() / 2),
+    k.anchor("center"),
+    k.area(),
+]); 
+
+const altgun = altplayer.add([
+    k.pos(0, 0),
+    k.sprite("gun"),
+    k.anchor(k.vec2(-2, 0.5)),
+    k.rotate(0),
+    k.area(),
+]);
+
 var cooldown = 0;
 
 const bullets = k.add([
@@ -107,7 +144,8 @@ const bullets = k.add([
     k.pos(0, 0),
     "bullets",
 ]);
-function angleGun() {
+
+function angleGun(gun, player, send = true) {
     gun.angle = k.mousePos().sub(player.pos).angle();
     gun.flipY = Math.abs(gun.angle) > 90;
     if (Math.abs(gun.angle) > 90) {
@@ -115,19 +153,21 @@ function angleGun() {
     } else {
         gun.anchor = k.vec2(-2, -0.5);
     }
-    ws.send(["angle", gun.angle]);
+    if (send) ws.send(JSON.stringify(["angle", gun.angle]));
 }
-k.onMouseMove(angleGun);
+k.onMouseMove(() => {
+    angleGun(gun, player);
+});
 
 player.on("update", () => {
     if (k.isButtonDown("up")) {
         player.move(0, -200);
-        ws.send(["move", player.pos]);
+        ws.send(JSON.stringify(["move", player.pos]));
         angleGun();
     }
     if (k.isButtonDown("down")) {
         player.move(0, 200);
-        ws.send(["move", player.pos]);
+        ws.send(JSON.stringify(["move", player.pos]));
         angleGun();
     }
 });
@@ -150,6 +190,6 @@ k.onUpdate(() => {
             k.rect(12, 5, { radius: 2 }),
             "bullet-local",
         ]);
-        ws.send(["fire", b.pos, angle]);
+        ws.send(JSON.stringify(["fire", b.pos.toArray(), angle]));
     }
 });
