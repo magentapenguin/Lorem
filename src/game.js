@@ -94,18 +94,7 @@ k.loadSprite("gun", "/static/gun.png");
 k.loadSound("hit", "/static/audio/hit.mp3");
 k.loadSound("pew", "/static/audio/pew.mp3");
 k.loadSound("music", "/static/audio/song.mp3");
-
-musicplay = false;
-try {
-    musicplay = k.play("music", { loop: true });
-} catch (e) {}
-
-k.onClick(() => {
-    if (musicplay) return;
-    try {
-        musicplay = k.play("music", { loop: true });
-    } catch (e) {}
-});
+k.loadFont("font", "/static/Kitchen Sink.ttf");
 
 function button(x, y, text, action, padding = 10) {
     const txt = k.formatText({
@@ -116,6 +105,7 @@ function button(x, y, text, action, padding = 10) {
         size: 24,
         width: 200,
         color: k.rgb(0, 0, 0),
+        font: "font",
     });
     console.log(txt.width, txt.height);
     const btn = k.add([
@@ -124,25 +114,79 @@ function button(x, y, text, action, padding = 10) {
             fill: k.rgb(1, 1, 1),
         }),
         k.outline(2),
-        k.pos(x-(txt.width/2+padding), y-(txt.height/2+padding*0.75)),
+        k.pos(x+padding, y+padding*0.75),
         k.anchor("center"),
         k.area(),
+        k.scale(1),
     ]);
     btn.onDraw(() => k.drawFormattedText(txt));
     btn.onHoverUpdate(() => {
         k.setCursor("pointer");
     });
+    btn.onHover(() => {
+        btn.scaleTo(1.2);
+    });
+    btn.onHoverEnd(() => {
+        btn.scaleTo(1);
+    });
     btn.onClick(action);
     return btn;
 }
 
+k.loadShader("checkerbg", null, `
+    uniform float u_time;
+    uniform vec3 u_color1;
+    uniform vec3 u_color2;
+    uniform vec2 u_speed;
+    uniform float u_angle;
+    uniform float u_scale;
+    uniform float u_aspect;
+    
+    #define PI 3.14159265359
+    vec4 frag(vec2 pos, vec2 uv, vec4 color, sampler2D tex) {
+        float angle = u_angle * PI / 180.0;
+        mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+        vec2 size = vec2(u_scale);
+        vec2 p = (pos + vec2(u_time) * u_speed) * vec2(u_aspect, 1.0);
+        p = p * rot;
+        float total = floor(p.x * size.x) + floor(p.y * size.y);
+        bool isEven = mod(total, 2.0) == 0.0;
+        vec4 col1 = vec4(u_color1 / 255.0, 1.0);
+        vec4 col2 = vec4(u_color2 / 255.0, 1.0);
+        return (isEven) ? col1 : col2;
+    }
+`)
+
 k.scene("menu", () => {
     k.onUpdate(() => k.setCursor("default"));
-    k.add([
-        k.text("Lorem Ipsum", 48),
+    const a = k.add([
+        k.text("Lorem Ipsum", { size: 72, font: "font" }),
         k.pos(k.width() / 2, k.height() / 2 - 100),
         k.anchor("center"),
+        k.area(),
     ]);
+    // funni lil line
+    k.add([
+        k.rect(a.width/1.1, 3),
+        k.pos(a.pos.x, a.pos.y+a.height/2+5),
+        k.anchor("center"),
+        k.color(255, 255, 255),
+    ]);
+
+    k.add([
+        k.rect(k.width(), k.height()),
+        k.scale(8),
+        k.z(-5),
+        k.shader("checkerbg", () => ({
+            "u_time": k.time() / 10,
+            "u_color1": k.rgb(40, 40, 40),
+            "u_color2": k.rgb(60, 60, 60),
+            "u_speed": k.vec2(0.5, -0.25),
+            "u_angle": 15,
+            "u_scale": 4,
+            "u_aspect": k.width() / k.height(),
+        })),
+    ])
     button(k.width() / 2, k.height() / 2, "Join Room", () => {
         k.debug.log("Joining room");
     });
