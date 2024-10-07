@@ -146,15 +146,25 @@ function mutebtn(theme) {
         k.anchor("center"),
         k.scale(4),
         k.area(),
-        { mode: false, },
+        { mode: false, isHovered: false, isClickedafterHover: false },
     ]);
+    btn.onHover(() => {
+        btn.isHovered = true;
+    });
+    btn.onHoverEnd(() => {
+        btn.isHovered = false;
+    });
     btn.onHoverUpdate(() => {
         k.setCursor("pointer");
     });
     btn.onMouseDown(() => {
+        if (!btn.isHovered) return;
+        btn.isClickedafterHover = true;
         btn.frame = 1+btn.mode*2;
     });
     btn.onMouseRelease(() => {
+        if (!btn.isClickedafterHover) return;
+        btn.isClickedafterHover = false;
         if (btn.mode) {
             music.stop();
         } else {
