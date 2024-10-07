@@ -36,6 +36,7 @@ ws.addEventListener("message", (e) => {
         angleGun(altgun, altplayer, false);
     }
     if (type === "fire") {
+        k.play("pew", { volume: 0.7 });
         const b = bullets.add([
             k.pos(data[0]),
             k.anchor("center"),
@@ -90,17 +91,21 @@ const k = kaplay({
 k.loadSprite("bean", "/static/bean.png");
 k.loadSprite("gun", "/static/gun.png");
 // Sounds
+k.loadSound("hit", "/static/audio/hit.mp3");
 k.loadSound("pew", "/static/audio/pew.mp3");
-k.loadMusic("music", "/static/audio/song.mp3");
+k.loadSound("music", "/static/audio/song.mp3");
 
+musicplay = false;
 try {
-    k.play("music", { loop: true });
-} catch (e) {
-    console.error(e);
-}
+    musicplay = k.play("music", { loop: true });
+} catch (e) {}
 
-// reset cursor to default on frame start for easier cursor management
-k.onUpdate(() => k.setCursor("crosshair"));
+k.onClick(() => {
+    if (musicplay) return;
+    try {
+        musicplay = k.play("music", { loop: true });
+    } catch (e) {}
+});
 
 function button(x, y, text, action, padding = 10) {
     const txt = k.formatText({
@@ -131,95 +136,124 @@ function button(x, y, text, action, padding = 10) {
     return btn;
 }
 
-button(k.width() / 2, k.height() / 2, "Join", ()=>k.debug.log("Joining..."));
+k.scene("menu", () => {
+    k.onUpdate(() => k.setCursor("default"));
+    k.add([
+        k.text("Lorem Ipsum", 48),
+        k.pos(k.width() / 2, k.height() / 2 - 100),
+        k.anchor("center"),
+    ]);
+    button(k.width() / 2, k.height() / 2, "Join Room", () => {
+        k.debug.log("Joining room");
+    });
 
+    button(k.width() / 2, k.height() / 2 + 50, "Create Room", () => {
+        k.debug.log("Creating room");
+    });
 
-const player = k.add([
-    k.sprite("bean"),
-    k.pos(k.width() - 70, k.height() / 2),
-    k.anchor("center"),
-    k.area(),
-]);
-
-const gun = player.add([
-    k.pos(0, 0),
-    k.sprite("gun"),
-    k.anchor(k.vec2(-2, 0.5)),
-    k.rotate(0),
-    k.area(),
-]);
-
-const altplayer = k.add([
-    k.sprite("bean"),
-    k.pos(k.width() - 70, k.height() / 2),
-    k.anchor("center"),
-    k.area(),
-]); 
-
-const altgun = altplayer.add([
-    k.pos(0, 0),
-    k.sprite("gun"),
-    k.anchor(k.vec2(-2, 0.5)),
-    k.rotate(0),
-    k.area(),
-]);
-
-var cooldown = 0;
-
-const bullets = k.add([
-    k.layer({
-        zIndex: 1,
-    }),
-    k.pos(0, 0),
-    "bullets",
-]);
-
-function angleGun(gun, player, send = true) {
-    gun.angle = k.mousePos().sub(player.pos).angle();
-    gun.flipY = Math.abs(gun.angle) > 90;
-    if (Math.abs(gun.angle) > 90) {
-        gun.anchor = k.vec2(-2, 0.5);
-    } else {
-        gun.anchor = k.vec2(-2, -0.5);
-    }
-    if (send) ws.send(JSON.stringify(["angle", gun.angle]));
-}
-k.onMouseMove(() => {
-    angleGun(gun, player);
+    button(k.width() / 2, k.height() / 2 + 100, "Settings", () => {
+        k.debug.log("Settings");
+    });
 });
 
-player.on("update", () => {
-    if (k.isButtonDown("up")) {
-        player.move(0, -200);
-        ws.send(JSON.stringify(["move", player.pos]));
-        angleGun();
+
+k.scene("game", () => {
+    // reset cursor to default on frame start for easier cursor management
+    k.onUpdate(() => k.setCursor("crosshair"));
+    const player = k.add([
+        k.sprite("bean"),
+        k.pos(k.width() - 70, k.height() / 2),
+        k.anchor("center"),
+        k.area(),
+    ]);
+
+    const gun = player.add([
+        k.pos(0, 0),
+        k.sprite("gun"),
+        k.anchor(k.vec2(-2, 0.5)),
+        k.rotate(0),
+        k.area(),
+    ]);
+
+    const altplayer = k.add([
+        k.sprite("bean"),
+        k.pos(k.width() - 70, k.height() / 2),
+        k.anchor("center"),
+        k.area(),
+    ]); 
+
+    const altgun = altplayer.add([
+        k.pos(0, 0),
+        k.sprite("gun"),
+        k.anchor(k.vec2(-2, 0.5)),
+        k.rotate(0),
+        k.area(),
+    ]);
+
+    var cooldown = 0;
+
+    const bullets = k.add([
+        k.layer({
+            zIndex: 1,
+        }),
+        k.pos(0, 0),
+        "bullets",
+    ]);
+
+    function angleGun(gun, player, send = true) {
+        gun.angle = k.mousePos().sub(player.pos).angle();
+        gun.flipY = Math.abs(gun.angle) > 90;
+        if (Math.abs(gun.angle) > 90) {
+            gun.anchor = k.vec2(-2, 0.5);
+        } else {
+            gun.anchor = k.vec2(-2, -0.5);
+        }
+        if (send) ws.send(JSON.stringify(["angle", gun.angle]));
     }
-    if (k.isButtonDown("down")) {
-        player.move(0, 200);
-        ws.send(JSON.stringify(["move", player.pos]));
-        angleGun();
-    }
+    k.onMouseMove(() => {
+        angleGun(gun, player);
+    });
+
+    player.on("update", () => {
+        if (k.isButtonDown("up")) {
+            player.move(0, -200);
+            ws.send(JSON.stringify(["move", player.pos]));
+            angleGun();
+        }
+        if (k.isButtonDown("down")) {
+            player.move(0, 200);
+            ws.send(JSON.stringify(["move", player.pos]));
+            angleGun();
+        }
+        // Hit detection
+        player.overlaps("bullet-remote", (b) => {
+            k.play("hit", { volume: 0.9 });
+            b.destroy();
+        });
+    });
+
+    k.onUpdate(() => {
+        cooldown -= k.dt();
+        if (cooldown < 0) cooldown = 0;
+        if (k.isButtonDown("fire")) {
+            if (cooldown > 0) return;
+            cooldown += 0.1;
+            k.play("pew", { volume: 0.9 });
+            let angle = gun.angle+k.randi(-2, 2);
+            const b = bullets.add([
+                k.pos(k.Vec2.fromAngle(gun.angle).scale(gun.width*1.5).add(player.pos)),
+                k.anchor("center"),
+                k.rotate(angle),
+                k.area(),
+                k.move(angle, 400),
+                k.offscreen({ destroy: true }),
+                k.color(64, 64, 64),
+                k.rect(12, 5, { radius: 2 }),
+                "bullet-local",
+            ]);
+            ws.send(JSON.stringify(["fire", b.pos.toArray(), angle]));
+        }
+    });
 });
 
-k.onUpdate(() => {
-    cooldown -= k.dt();
-    if (cooldown < 0) cooldown = 0;
-    if (k.isButtonDown("fire")) {
-        if (cooldown > 0) return;
-        cooldown += 0.1;
-        k.play("pew")
-        let angle = gun.angle+k.randi(-2, 2);
-        const b = bullets.add([
-            k.pos(k.Vec2.fromAngle(gun.angle).scale(gun.width*1.5).add(player.pos)),
-            k.anchor("center"),
-            k.rotate(angle),
-            k.area(),
-            k.move(angle, 400),
-            k.offscreen({ destroy: true }),
-            k.color(64, 64, 64),
-            k.rect(12, 5, { radius: 2 }),
-            "bullet-local",
-        ]);
-        ws.send(JSON.stringify(["fire", b.pos.toArray(), angle]));
-    }
-});
+k.go("menu");
