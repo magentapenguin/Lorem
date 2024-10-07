@@ -50,9 +50,10 @@
             flex-direction: column;
             justify-content: space-between;
             color-scheme: dark;
+            padding: 10px;
+            resize: horizontal;
         }
         #chat {
-            padding: 10px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -107,7 +108,35 @@
         #players {
             padding: 10px;
             overflow-y: auto;
+            border: 1px solid #fff;
+            flex: 0.5 1 auto;
         }
+        #p-text {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 2px;
+            font-size: 0.8em;
+        }
+        /* Chat styling */
+        .chat-message {
+            margin-bottom: 5px;
+        }
+        .chat-message .chat-username {
+            font-weight: bold;
+        }
+        .chat-message .chat-text {
+            margin-left: 5px;
+        }
+        .chat-message.chat-info {
+            font-style: italic;
+        }
+        /* Players styling */
+        .player {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
         
 
     </style>
@@ -115,6 +144,9 @@
 <body>
     <canvas id="game"></canvas>
     <div id="console">
+        <div id="console-resize">
+            eeeee
+        </div>
         <div id="chat">
             <div id="chat-messages"></div>
             <form id="chat-form">
@@ -122,8 +154,10 @@
                 <button id="chat-send" type="button">Send</button>
             </form>
         </div>
+        <span id="p-text">Players</span>
         <div id="players"></div>
     </div>
     <script src="dist/game.js"></script>
+    <script src="static/console-resize.js"></script>
 </body>
 </html>

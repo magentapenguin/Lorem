@@ -3,8 +3,16 @@ import PartySocket from "partysocket";
 
 const ws = new PartySocket({
     host: "https://lorem-ipsum-game.magentapenguin.partykit.dev/",
-    room: "dev",
+    room: "test2",
 });
+
+
+
+function moveroom(room) {
+    ws.partySocketOptions.room = room;
+    ws.reconnect(room)
+}
+window.moveroom = moveroom;
 
 ws.addEventListener("close", () => {
     console.warn("connection closed");
@@ -16,10 +24,10 @@ ws.addEventListener("message", (e) => {
     const [type, ...data] = JSON.parse(e.data);
     console.log(type, data);
     if (type === "join") {
-        k.debug.log("joined");
+        add2chat('joined', data[0], true)
     }
     if (type === "leave") {
-        k.debug.log("left");
+        add2chat('left', data[0], true)
     }
     if (type === "move") {
         altplayer.pos = data[0];
@@ -40,7 +48,19 @@ ws.addEventListener("message", (e) => {
             "bullet-remote",
         ]);
     }
+    if (type === "chat") {
+        // Add to chat
+        add2chat(data[1], data[0])
+    }
 });
+
+function add2chat(message, user, info = false) {
+    let chatelm = document.getElementById('chat-messages')
+    let msg = document.createElement('div')
+    msg.className = 'chat-message' + (info?" chat-info":"")
+    msg.innerHTML = `<span class="chat-username">${user}</span><span class="chat-text">${message}</span>`
+    chatelm.appendChild(msg)
+}
 
 const k = kaplay({
     debugKey: "i",
@@ -69,6 +89,15 @@ const k = kaplay({
 
 k.loadSprite("bean", "/static/bean.png");
 k.loadSprite("gun", "/static/gun.png");
+// Sounds
+k.loadSound("pew", "/static/audio/pew.mp3");
+k.loadMusic("music", "/static/audio/song.mp3");
+
+try {
+    k.play("music", { loop: true });
+} catch (e) {
+    console.error(e);
+}
 
 // reset cursor to default on frame start for easier cursor management
 k.onUpdate(() => k.setCursor("crosshair"));
@@ -178,6 +207,7 @@ k.onUpdate(() => {
     if (k.isButtonDown("fire")) {
         if (cooldown > 0) return;
         cooldown += 0.1;
+        k.play("pew")
         let angle = gun.angle+k.randi(-2, 2);
         const b = bullets.add([
             k.pos(k.Vec2.fromAngle(gun.angle).scale(gun.width*1.5).add(player.pos)),
