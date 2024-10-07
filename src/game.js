@@ -1,17 +1,17 @@
 import kaplay from "kaplay"; // Note to copilot: kaplay is the community-driven fork of KaBoom.js
 import PartySocket from "partysocket";
 
-const ws = new PartySocket({
-    host: "https://lorem-ipsum-game.magentapenguin.partykit.dev/",
-    room: "test2",
-});
-
+var ws;
 
 
 function moveroom(room) {
-    ws.partySocketOptions.room = room;
-    ws.reconnect(room)
+    if (ws) ws.close();
+    ws = new PartySocket({
+        host: "https://lorem-ipsum-game.magentapenguin.partykit.dev/",
+        room: room,
+    });    
 }
+moveroom("test");
 window.moveroom = moveroom;
 
 ws.addEventListener("close", () => {
@@ -94,7 +94,6 @@ k.loadSprite("gun", "/static/gun.png");
 k.loadSound("hit", "/static/audio/hit.mp3");
 k.loadSound("pew", "/static/audio/pew.mp3");
 k.loadSound("music", "/static/audio/song.mp3");
-k.loadFont("font", "/static/Kitchen Sink.ttf");
 
 function button(x, y, text, action, padding = 10) {
     const txt = k.formatText({
@@ -105,7 +104,6 @@ function button(x, y, text, action, padding = 10) {
         size: 24,
         width: 200,
         color: k.rgb(0, 0, 0),
-        font: "font",
     });
     console.log(txt.width, txt.height);
     const btn = k.add([
@@ -160,7 +158,7 @@ k.loadShader("checkerbg", null, `
 k.scene("menu", () => {
     k.onUpdate(() => k.setCursor("default"));
     const a = k.add([
-        k.text("Lorem Ipsum", { size: 72, font: "font" }),
+        k.text("Lorem Ipsum", { size: 72, }),
         k.pos(k.width() / 2, k.height() / 2 - 100),
         k.anchor("center"),
         k.area(),
@@ -168,9 +166,15 @@ k.scene("menu", () => {
     // funni lil line
     k.add([
         k.rect(a.width/1.1, 3),
-        k.pos(a.pos.x, a.pos.y+a.height/2+5),
+        k.pos(a.pos.x, a.pos.y+a.height/2-10),
         k.anchor("center"),
         k.color(255, 255, 255),
+    ]);
+    k.add([
+        k.text("The game that is in development", { size: 20, }),
+        k.pos(a.pos.x, a.pos.y+a.height/2+5),
+        k.anchor("center"),
+        k.area(),
     ]);
 
     k.add([
@@ -188,7 +192,7 @@ k.scene("menu", () => {
         })),
     ])
     button(k.width() / 2, k.height() / 2, "Join Room", () => {
-        k.debug.log("Joining room");
+        k.go("game");
     });
 
     button(k.width() / 2, k.height() / 2 + 50, "Create Room", () => {
@@ -269,11 +273,13 @@ k.scene("game", () => {
             ws.send(JSON.stringify(["move", player.pos]));
             angleGun();
         }
-        // Hit detection
-        player.overlaps("bullet-remote", (b) => {
-            k.play("hit", { volume: 0.9 });
-            b.destroy();
-        });
+    });
+
+    
+    // Hit detection
+    player.onCollide("bullet-remote", (b) => {
+        k.play("hit", { volume: 0.9 });
+        b.destroy();
     });
 
     k.onUpdate(() => {
