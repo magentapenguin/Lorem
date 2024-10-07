@@ -90,10 +90,18 @@ const k = kaplay({
 
 k.loadSprite("bean", "/static/bean.png");
 k.loadSprite("gun", "/static/gun.png");
+k.loadSpriteAtlas("/static/muteunmute.png", {
+    // Dark theme
+    "mute-dark": {x: 0, y: 0, width: 60, height: 16, sliceX: 4},
+    // Light theme
+    "mute-light": {x: 0, y: 16, width: 60, height: 16, sliceX: 4},
+});
 // Sounds
 k.loadSound("hit", "/static/audio/hit.mp3");
 k.loadSound("pew", "/static/audio/pew.mp3");
 k.loadSound("music", "/static/audio/song.mp3");
+
+var music;
 
 function button(x, y, text, action, padding = 10) {
     const txt = k.formatText({
@@ -131,6 +139,33 @@ function button(x, y, text, action, padding = 10) {
     return btn;
 }
 
+function mutebtn(theme) {
+    const btn = k.add([
+        k.sprite("mute-"+theme),
+        k.pos(k.width()-48, k.height()-48),
+        k.anchor("center"),
+        k.scale(4),
+        k.area(),
+        { mode: false, },
+    ]);
+    btn.onHoverUpdate(() => {
+        k.setCursor("pointer");
+    });
+    btn.onMouseDown(() => {
+        btn.frame = 1+btn.mode*2;
+    });
+    btn.onMouseRelease(() => {
+        if (btn.mode) {
+            music.stop();
+        } else {
+            music = k.play("music", { loop: true, volume: 0.5 });
+        }
+        btn.mode = !btn.mode;
+        btn.frame = btn.mode*2;
+    });
+    return btn;
+}
+
 k.loadShader("checkerbg", null, `
     uniform float u_time;
     uniform vec3 u_color1;
@@ -157,6 +192,7 @@ k.loadShader("checkerbg", null, `
 
 k.scene("menu", () => {
     k.onUpdate(() => k.setCursor("default"));
+    mutebtn("light");
     const a = k.add([
         k.text("Lorem Ipsum", { size: 72, }),
         k.pos(k.width() / 2, k.height() / 2 - 100),
