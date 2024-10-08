@@ -1,6 +1,7 @@
 import kaplay from "kaplay"; // Note to copilot: kaplay is the community-driven fork of KaBoom.js
 import PartySocket from "partysocket";
 
+/** @type {PartySocket} */
 var ws;
 
 
@@ -11,7 +12,7 @@ function moveroom(room) {
         room: room,
     });    
 }
-moveroom("test");
+moveroom("connect");
 window.moveroom = moveroom;
 
 ws.addEventListener("close", () => {
@@ -19,48 +20,17 @@ ws.addEventListener("close", () => {
     k.debug.log("connection closed");
 });
 
-ws.addEventListener("message", (e) => {
-    console.log(e.data);
-    const [type, ...data] = JSON.parse(e.data);
-    console.log(type, data);
-    if (type === "join") {
-        add2chat('joined', data[0], true)
-    }
-    if (type === "leave") {
-        add2chat('left', data[0], true)
-    }
-    if (type === "move") {
-        altplayer.pos = data[0];
-    }
-    if (type === "angle") {
-        angleGun(altgun, altplayer, false);
-    }
-    if (type === "fire") {
-        k.play("pew", { volume: 0.7 });
-        const b = bullets.add([
-            k.pos(data[0]),
-            k.anchor("center"),
-            k.rotate(data[1]),
-            k.area(),
-            k.move(data[1], 400),
-            k.offscreen({ destroy: true }),
-            k.color(64, 64, 64),
-            k.rect(12, 5, { radius: 2 }),
-            "bullet-remote",
-        ]);
-    }
-    if (type === "chat") {
-        // Add to chat
-        add2chat(data[1], data[0])
-    }
-});
 
 function add2chat(message, user, info = false) {
+    k.debug.log(message, user)
+    console.log(message, user, info)
+    /*
     let chatelm = document.getElementById('chat-messages')
     let msg = document.createElement('div')
     msg.className = 'chat-message' + (info?" chat-info":"")
     msg.innerHTML = `<span class="chat-username">${user}</span><span class="chat-text">${message}</span>`
     chatelm.appendChild(msg)
+    */
 }
 
 const k = kaplay({
@@ -341,8 +311,8 @@ k.scene("game", () => {
         if (cooldown < 0) cooldown = 0;
         if (k.isButtonDown("fire")) {
             if (cooldown > 0) return;
-            cooldown += 0.1;
-            k.play("pew", { volume: 0.9 });
+            cooldown += 0.5;
+            k.play("pew", { volume: 0.8 });
             let angle = gun.angle+k.randi(-2, 2);
             const b = bullets.add([
                 k.pos(k.Vec2.fromAngle(gun.angle).scale(gun.width*1.5).add(player.pos)),
@@ -356,6 +326,42 @@ k.scene("game", () => {
                 "bullet-local",
             ]);
             ws.send(JSON.stringify(["fire", b.pos.toArray(), angle]));
+        }
+    });
+    
+    ws.addEventListener("message", (e) => {
+        console.log(e.data);
+        const [type, ...data] = JSON.parse(e.data);
+        console.log(type, data);
+        if (type === "join") {
+            add2chat('joined', data[0], true)
+        }
+        if (type === "leave") {
+            add2chat('left', data[0], true)
+        }
+        if (type === "move") {
+            altplayer.pos = data[0];
+        }
+        if (type === "angle") {
+            angleGun(altgun, altplayer, false);
+        }
+        if (type === "fire") {
+            k.play("pew", { volume: 0.6 });
+            const b = bullets.add([
+                k.pos(data[0]),
+                k.anchor("center"),
+                k.rotate(data[1]),
+                k.area(),
+                k.move(data[1], 400),
+                k.offscreen({ destroy: true }),
+                k.color(64, 64, 64),
+                k.rect(12, 5, { radius: 2 }),
+                "bullet-remote",
+            ]);
+        }
+        if (type === "chat") {
+            // Add to chat
+            add2chat(data[1], data[0])
         }
     });
 });
