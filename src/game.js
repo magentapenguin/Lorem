@@ -66,15 +66,10 @@ k.loadSpriteAtlas("/static/muteunmute.png", {
     // Light theme
     "mute-light": {x: 0, y: 16, width: 60, height: 16, sliceX: 4},
 });
-k.loadSpriteAtlas("/static/btnslice9.png", {
-    // Dark theme
-    "btn-dark": {x: 0, y: 0, width: 15, height: 16, slice9: {left: 3, right: 3, top: 3, bottom: 3}},
-    "btn-dark-flat": {x: 15, y: 0, width: 15, height: 16, slice9: {left: 3, right: 3, top: 3, bottom: 3}},
-    // Light theme
-    "btn-light": {x: 0, y: 16, width: 15, height: 16, slice9: {left: 3, right: 3, top: 3, bottom: 3}},
-    "btn-light-flat": {x: 15, y: 16, width: 15, height: 16, slice9: {left: 3, right: 3, top: 3, bottom: 3}},
-
-});
+k.loadSprite("btn-dark", "/static/btn-dark.png", { slice9: {top: 3, bottom: 3, left: 2, right: 2} });
+k.loadSprite("btn-light", "/static/btn-light.png", { slice9: {top: 3, bottom: 3, left: 2, right: 2} });
+k.loadSprite("btn-dark-flat", "/static/btn-dark-flat.png", { slice9: {top: 3, bottom: 3, left: 2, right: 2} });
+k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: {top: 3, bottom: 3, left: 2, right: 2} });
 
 // Sounds
 k.loadSound("hit", "/static/audio/hit.mp3");
@@ -83,7 +78,7 @@ k.loadSound("music", "/static/audio/song.mp3");
 
 var music;
 
-function button(x, y, text, action, padding = 10, theme = "light-flat") {
+function button(x, y, text, action, padding = 10, theme = "dark") {
     const txt = k.formatText({
         //pos: k.vec2(x, y),
         anchor: "center",
@@ -91,7 +86,7 @@ function button(x, y, text, action, padding = 10, theme = "light-flat") {
         text: text,
         size: 24,
         width: 200,
-        color: theme.includes('light') ? k.rgb(0, 0, 0) : k.rgb(255, 255, 255),
+        color: theme.includes('dark') ? k.rgb(0, 0, 0) : k.rgb(255, 255, 255),
     });
     console.log(txt.width, txt.height);
     const btn = k.add([
@@ -99,7 +94,7 @@ function button(x, y, text, action, padding = 10, theme = "light-flat") {
         k.pos(x+padding, y+padding*0.75),
         k.anchor("center"),
         k.area(),
-        k.scale(4),
+        k.scale(1),
     ]);
     btn.onDraw(() => k.drawFormattedText(txt));
     btn.onHoverUpdate(() => {
@@ -111,9 +106,11 @@ function button(x, y, text, action, padding = 10, theme = "light-flat") {
     btn.onHoverEnd(() => {
         btn.scaleTo(1);
     });
+    btn.onUpdate(() => {
+        btn.width = 200+padding*2;
+        btn.height = txt.height+padding*1.5;
+    });
     btn.onClick(action);
-    btn.width = 200+padding*2;
-    btn.height = txt.height+padding*1.5;
     return btn;
 }
 
