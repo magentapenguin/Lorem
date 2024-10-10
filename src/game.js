@@ -5,20 +5,13 @@ import PartySocket from "partysocket";
 var ws;
 
 
-function moveroom(room) {
-    if (ws) ws.close();
-    ws = new PartySocket({
-        host: "https://lorem-ipsum-game.magentapenguin.partykit.dev/",
-        room: room,
-    });    
+function wsinit() {
+    ws.addEventListener("close", () => {
+        console.warn("connection closed");
+        k.debug.log("connection closed");
+    });
 }
-moveroom("connect");
-window.moveroom = moveroom;
 
-ws.addEventListener("close", () => {
-    console.warn("connection closed");
-    k.debug.log("connection closed");
-});
 
 
 function add2chat(message, user, info = false) {
@@ -78,7 +71,7 @@ k.loadSound("music", "/static/audio/song.mp3");
 
 var music;
 
-function button(x, y, text, action, padding = 10, theme = "dark") {
+function button(x, y, text, action, padding = 10, theme = "light", add = true) {
     const txt = k.formatText({
         //pos: k.vec2(x, y),
         anchor: "center",
@@ -89,6 +82,7 @@ function button(x, y, text, action, padding = 10, theme = "dark") {
         color: theme.includes('dark') ? k.rgb(0, 0, 0) : k.rgb(255, 255, 255),
     });
     console.log(txt.width, txt.height);
+
     const btn = k.add([
         k.sprite("btn-"+theme),
         k.pos(x+padding, y+padding*0.75),
@@ -175,6 +169,7 @@ k.loadShader("checkerbg", null, `
     }
 `)
 
+
 k.scene("menu", () => {
     k.onUpdate(() => k.setCursor("default"));
     mutebtn("light");
@@ -213,7 +208,16 @@ k.scene("menu", () => {
         })),
     ])
     button(k.width() / 2, k.height() / 2, "Join Room", () => {
-        k.go("game");
+
+        if (ws) ws.close();
+        ws = new PartySocket({
+            host: "https://lorem-ipsum-game.magentapenguin.partykit.dev/",
+            room: "connect",
+        });
+        wsinit();
+        ws.addEventListener('open',() => {
+            k.go("game");
+        })
     });
 
     button(k.width() / 2, k.height() / 2 + 50, "Create Room", () => {
@@ -231,7 +235,7 @@ k.scene("game", () => {
     k.onUpdate(() => k.setCursor("crosshair"));
     const player = k.add([
         k.sprite("bean"),
-        k.pos(k.width() - 70, k.height() / 2),
+        k.pos(k.width() / 2, k.height() / 2),
         k.anchor("center"),
         k.area(),
     ]);
@@ -246,7 +250,7 @@ k.scene("game", () => {
 
     const altplayer = k.add([
         k.sprite("bean"),
-        k.pos(k.width() - 70, k.height() / 2),
+        k.pos(k.width() / 2, k.height() / 2),
         k.anchor("center"),
         k.area(),
     ]); 
@@ -269,8 +273,8 @@ k.scene("game", () => {
         "bullets",
     ]);
 
-    function angleGun(gun, player, send = true) {
-        gun.angle = k.mousePos().sub(player.pos).angle();
+    function angleGun(gun, player, angle, send = true) {
+        gun.angle = angle ?? k.mousePos().sub(player.pos).angle();
         gun.flipY = Math.abs(gun.angle) > 90;
         if (Math.abs(gun.angle) > 90) {
             gun.anchor = k.vec2(-2, 0.5);
@@ -360,7 +364,16 @@ k.scene("game", () => {
             // Add to chat
             add2chat(data[1], data[0])
         }
+        if (type === "init") {
+            console.log("init", data[1]);
+            player.pos = data[1] == "left" ? k.vec2(70, k.height() / 2) : k.vec2(k.width() - 70, k.height() / 2);
+            altplayer.pos = data[1] == "left" ? k.vec2(k.width() - 70, k.height() / 2) : k.vec2(70, k.height() / 2);
+        }
     });
+    setTimeout(() => {
+        ws.send(JSON.stringify(["ready"]));
+        console.log("ready");
+    }, 500);
 });
 
 k.go("menu");
