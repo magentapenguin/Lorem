@@ -10,7 +10,7 @@ export default class WebSocketServer {
     const [type, ...data] = JSON.parse(message);
 
     if (type === 'ready') {
-      sender.send(JSON.stringify(['init', connection.id, connection.state.side]));
+      sender.send(JSON.stringify(['init', sender.id, sender.state.side]));
     }
 
     // send it to everyone else

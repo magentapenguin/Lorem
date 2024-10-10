@@ -291,12 +291,12 @@ k.scene("game", () => {
         if (k.isButtonDown("up")) {
             player.move(0, -200);
             ws.send(JSON.stringify(["move", player.pos]));
-            angleGun();
+            angleGun(gun, player);
         }
         if (k.isButtonDown("down")) {
             player.move(0, 200);
             ws.send(JSON.stringify(["move", player.pos]));
-            angleGun();
+            angleGun(gun, player);
         }
     });
 
@@ -344,7 +344,7 @@ k.scene("game", () => {
             altplayer.pos = data[0];
         }
         if (type === "angle") {
-            angleGun(altgun, altplayer, false);
+            angleGun(altgun, altplayer, data[0], false);
         }
         if (type === "fire") {
             k.play("pew", { volume: 0.6 });
