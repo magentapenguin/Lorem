@@ -12,6 +12,10 @@ export default class WebSocketServer {
     if (type === 'ready') {
       sender.send(JSON.stringify(['init', sender.id, sender.state.side]));
     }
+    if (type === 'ping') {
+      sender.send(JSON.stringify(['pong', ...(this.room.getConnections().map(c => c.id))]));
+      return;
+    }
 
     // send it to everyone else
     this.room.broadcast(message, [sender.id]);

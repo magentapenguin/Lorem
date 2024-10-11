@@ -47,6 +47,7 @@ const k = kaplay({
             gamepad: "buttonA",
         },
     },
+    crisp: true,
 
     background: [255, 255, 255],
 });
@@ -59,10 +60,17 @@ k.loadSpriteAtlas("/static/muteunmute.png", {
     // Light theme
     "mute-light": {x: 0, y: 16, width: 60, height: 16, sliceX: 4},
 });
-k.loadSprite("btn-dark", "/static/btn-dark.png", { slice9: {top: 3, bottom: 3, left: 2, right: 2} });
-k.loadSprite("btn-light", "/static/btn-light.png", { slice9: {top: 3, bottom: 3, left: 2, right: 2} });
-k.loadSprite("btn-dark-flat", "/static/btn-dark-flat.png", { slice9: {top: 3, bottom: 3, left: 2, right: 2} });
-k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: {top: 3, bottom: 3, left: 2, right: 2} });
+k.loadSpriteAtlas("/static/back.png", {
+    // Dark theme
+    "back-dark": {x: 0, y: 0, width: 30, height: 16, sliceX: 2},
+    // Light theme
+    "back-light": {x: 0, y: 16, width: 30, height: 16, sliceX: 2},
+});
+let scale = 3; // SCALE var from splitbtnsprites.py
+k.loadSprite("btn-dark", "/static/btn-dark.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
+k.loadSprite("btn-light", "/static/btn-light.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
+k.loadSprite("btn-dark-flat", "/static/btn-dark-flat.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
+k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
 
 // Sounds
 k.loadSound("hit", "/static/audio/hit.mp3");
@@ -71,10 +79,10 @@ k.loadSound("music", "/static/audio/song.mp3");
 
 var music;
 
-function button(x, y, text, action, padding = 10, theme = "light", add = true) {
+function button(x, y, text, action, padding = 10, theme = "light") {
     const txt = k.formatText({
-        //pos: k.vec2(x, y),
-        anchor: "center",
+        pos: k.vec2(padding/2, padding*0.75),
+        anchor: "topleft",
         align: "center",
         text: text,
         size: 24,
@@ -86,23 +94,29 @@ function button(x, y, text, action, padding = 10, theme = "light", add = true) {
     const btn = k.add([
         k.sprite("btn-"+theme),
         k.pos(x+padding, y+padding*0.75),
-        k.anchor("center"),
+        k.anchor("topleft"),
         k.area(),
         k.scale(1),
     ]);
-    btn.onDraw(() => k.drawFormattedText(txt));
+    
+    btn.onDraw(() => {
+        k.drawFormattedText(txt)
+    });
     btn.onHoverUpdate(() => {
         k.setCursor("pointer");
-    });
+    });/*
     btn.onHover(() => {
         btn.scaleTo(1.2);
     });
     btn.onHoverEnd(() => {
         btn.scaleTo(1);
-    });
+    });*/
     btn.onUpdate(() => {
         btn.width = 200+padding*2;
         btn.height = txt.height+padding*1.5;
+        
+        btn.pos.x = x+padding-btn.width/2;
+        btn.pos.y = y+padding*0.75-btn.height/2;
     });
     btn.onClick(action);
     return btn;
@@ -115,7 +129,7 @@ function mutebtn(theme) {
         k.anchor("center"),
         k.scale(4),
         k.area(),
-        { mode: false, isHovered: false, isClickedafterHover: false },
+        { mode: false, isHovered: false, isClickedAfterHover: false },
     ]);
     btn.onHover(() => {
         btn.isHovered = true;
@@ -128,12 +142,12 @@ function mutebtn(theme) {
     });
     btn.onMouseDown(() => {
         if (!btn.isHovered) return;
-        btn.isClickedafterHover = true;
+        btn.isClickedAfterHover = true;
         btn.frame = 1+btn.mode*2;
     });
     btn.onMouseRelease(() => {
-        if (!btn.isClickedafterHover) return;
-        btn.isClickedafterHover = false;
+        if (!btn.isClickedAfterHover) return;
+        btn.isClickedAfterHover = false;
         if (btn.mode) {
             music.stop();
         } else {
@@ -144,6 +158,40 @@ function mutebtn(theme) {
     });
     return btn;
 }
+
+
+function backbtn(theme,callback) {
+    const btn = k.add([
+        k.sprite("back-"+theme, ),
+        k.pos(48, 48),
+        k.anchor("center"),
+        k.scale(4),
+        k.area(),
+        { isHovered: false, isClickedAfterHover: false },
+    ]);
+    btn.onHover(() => {
+        btn.isHovered = true;
+    });
+    btn.onHoverEnd(() => {
+        btn.isHovered = false;
+    });
+    btn.onHoverUpdate(() => {
+        k.setCursor("pointer");
+    });
+    btn.onMouseDown(() => {
+        if (!btn.isHovered) return;
+        btn.isClickedAfterHover = true;
+        btn.frame = 1;
+    });
+    btn.onMouseRelease(() => {
+        if (!btn.isClickedAfterHover) return;
+        btn.isClickedAfterHover = false;
+        btn.frame = 0;
+        callback();
+    });
+    return btn;
+}
+
 
 k.loadShader("checkerbg", null, `
     uniform float u_time;
@@ -369,11 +417,21 @@ k.scene("game", () => {
             player.pos = data[1] == "left" ? k.vec2(70, k.height() / 2) : k.vec2(k.width() - 70, k.height() / 2);
             altplayer.pos = data[1] == "left" ? k.vec2(k.width() - 70, k.height() / 2) : k.vec2(70, k.height() / 2);
         }
+        if (type === "pong") {
+            console.log("pong", data);
+        }
     });
     setTimeout(() => {
         ws.send(JSON.stringify(["ready"]));
         console.log("ready");
     }, 500);
+    setInterval(() => {
+        ws.send(JSON.stringify(["ping"]));
+    }, 30000);
+    backbtn("dark", () => {
+        ws.close();
+        k.go("menu");
+    });
 });
 
 k.go("menu");
