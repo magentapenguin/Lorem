@@ -3,6 +3,7 @@ import PartySocket from "partysocket";
 
 /** @type {PartySocket} */
 var ws;
+const HOST = "https://lorem-ipsum-game.magentapenguin.partykit.dev/";
 
 
 function wsinit() {
@@ -54,6 +55,8 @@ const k = kaplay({
 
 k.loadSprite("bean", "/static/bean.png");
 k.loadSprite("gun", "/static/gun.png");
+k.loadSprite("github", "/static/github.png");
+k.loadSprite("discord", "/static/discord.png");
 k.loadSpriteAtlas("/static/muteunmute.png", {
     // Dark theme
     "mute-dark": {x: 0, y: 0, width: 60, height: 16, sliceX: 4},
@@ -72,10 +75,13 @@ k.loadSprite("btn-light", "/static/btn-light.png", { slice9: {top: 3*scale, bott
 k.loadSprite("btn-dark-flat", "/static/btn-dark-flat.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
 k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
 
+
+
 // Sounds
 k.loadSound("hit", "/static/audio/hit.mp3");
 k.loadSound("pew", "/static/audio/pew.mp3");
 k.loadSound("music", "/static/audio/song.mp3");
+
 
 var music;
 
@@ -131,6 +137,11 @@ function mutebtn(theme) {
         k.area(),
         { mode: false, isHovered: false, isClickedAfterHover: false },
     ]);
+    console.log(music);
+    if (music && !music.paused) {
+        btn.mode = true;
+        btn.frame = 2;
+    }
     btn.onHover(() => {
         btn.isHovered = true;
     });
@@ -217,6 +228,31 @@ k.loadShader("checkerbg", null, `
     }
 `)
 
+k.scene("loading", () => {
+    k.add([
+        k.text("Loading...", { size: 48 }),
+        k.pos(k.width() / 2, k.height() / 2),
+        k.anchor("center"),
+    ]);
+    button(k.width() / 2, k.height() / 2 + 50, "Cancel", () => {
+        ws.close();
+        k.go("menu");
+    });
+    k.add([
+        k.rect(k.width(), k.height()),
+        k.scale(8),
+        k.z(-5),
+        k.shader("checkerbg", () => ({
+            "u_time": k.time() / 10,
+            "u_color1": k.rgb(40, 40, 40),
+            "u_color2": k.rgb(60, 60, 60),
+            "u_speed": k.vec2(0.5, -0.25),
+            "u_angle": 15,
+            "u_scale": 4,
+            "u_aspect": k.width() / k.height(),
+        })),
+    ]);
+});
 
 k.scene("menu", () => {
     k.onUpdate(() => k.setCursor("default"));
@@ -241,6 +277,44 @@ k.scene("menu", () => {
         k.area(),
     ]);
 
+    const logo = (y, name, text, url, color) => {
+        const a = k.add([
+            k.sprite(name),
+            k.pos(50, k.height() - ((1+y)*50)),
+            k.anchor("center"),
+            k.area(),
+            k.scale(0.5),
+            { curtween: null },
+        ]);
+        a.onHoverUpdate(() => {
+            k.setCursor("pointer");
+        });
+        a.onClick(() => {
+            window.open(url, "_blank");
+        });
+        const t = a.add([
+            k.text(text, { size: 56, }),
+            k.pos(48,0),
+            k.anchor("left"),
+            k.area(),
+            k.color(color),
+
+        ]); 
+        //t.width = 0;
+        a.onHover(() => {
+            if (a.curtween) a.curtween.cancel();
+            a.curtween = k.tween(a.scale.x, 0.8, 0.1, (w) => a.scaleTo(w), k.easings.easeOutExpo);
+        })
+        a.onHoverEnd(() => {
+            if (a.curtween) a.curtween.cancel();
+            a.curtween = k.tween(a.scale.x, 0.5, 0.1, (w) => a.scaleTo(w), k.easings.easeOutExpo);
+        });
+        return a;
+    }
+    
+    logo(0, "github", "Github", "https://github.com/magentapenguin/Lorem", "#FFFFFF");
+    logo(1, "discord", "Discord", "https://discord.gg/qrkdS85Wcn", "#5766F2");
+
     k.add([
         k.rect(k.width(), k.height()),
         k.scale(8),
@@ -259,13 +333,14 @@ k.scene("menu", () => {
 
         if (ws) ws.close();
         ws = new PartySocket({
-            host: "https://lorem-ipsum-game.magentapenguin.partykit.dev/",
+            host: HOST,
             room: "connect",
         });
         wsinit();
         ws.addEventListener('open',() => {
             k.go("game");
         })
+        k.go("loading");
     });
 
     button(k.width() / 2, k.height() / 2 + 50, "Create Room", () => {

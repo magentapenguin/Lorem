@@ -37,7 +37,15 @@ export default class WebSocketServer {
   }
   // when a client disconnects
   onClose(connection) {
+    
     this.room.broadcast(JSON.stringify(['leave', connection.id]), [connection.id]);
+  }
+  updateSides() {
+    const connections = this.room.getConnections();
+    for (const [i, conn] of connections.entries()) {
+      conn.setState({ side: i === 0 ? 'left' : 'right' });
+      conn.send(JSON.stringify(['init', conn.id, conn.state.side]));
+    }
   }
 }
 
