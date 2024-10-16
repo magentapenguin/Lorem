@@ -5,5 +5,9 @@
   },
   "devDependencies": {
     "partykit": "0.0.110"
+  },
+  "scripts": {
+    "dev": "npx partykit dev",
+    "publish": "npx partykit deploy"
   }
 }

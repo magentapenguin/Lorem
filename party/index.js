@@ -51,6 +51,12 @@ export default class WebSocketServer {
       connections[0].state.side = second === 'left' ? 'right' : 'left';
       connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
     }
+    if (!first && !second) {
+      connections[0].state.side = 'left';
+      connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
+      connections[1].state.side = 'right';
+      connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
+    }
   }
 }
 

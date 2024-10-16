@@ -30,7 +30,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             overflow: hidden;
         }
         *, *::before, *::after {
@@ -39,110 +38,6 @@
         ::-webkit-scrollbar {
             display: none;
         }
-        #game {
-            background-color: #000;
-            border: 1px solid #000;
-        }
-        #console {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 200px;
-            height: 100%;
-            background-color: #333;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            color-scheme: dark;
-            padding: 10px;
-            resize: horizontal;
-        }
-        #chat {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            flex-grow: 0.5;
-        }
-        button {
-            cursor: pointer;
-        }
-        #chat-input {
-            
-            padding: 5px;
-            margin-bottom: 5px;
-            border: 1px solid #fff;
-            background-color: #333;
-            color: #fff;
-            outline: #1d92ff96 solid 0px;
-            outline-offset: 0px;
-            transition: outline 0.2s, outline-offset 0.2s;
-        }
-        
-        #chat-input:focus {
-            outline: #1d92ff96 solid 2px;
-            outline-offset: 2px;
-        }
-
-        #chat-form {
-            display: flex;
-            justify-content: space-between;
-            flex-direction: column;
-        }
-
-        #chat-messages {
-            padding: 10px;
-            overflow-y: auto;
-            flex-grow: 1;
-            border: 1px solid #fff;
-            margin-bottom: 10px;
-        }
-
-        #chat-send {
-            padding: 5px;
-            border: 1px solid #fff;
-            background-color: #333;
-            color: #fff;
-        }
-        #chat-send:hover {
-            background-color: #444;
-        }
-        #chat-send:active {
-            background-color: #777;
-        }
-        #players {
-            padding: 10px;
-            overflow-y: auto;
-            border: 1px solid #fff;
-            flex: 0.5 1 auto;
-        }
-        #p-text {
-            text-align: center;
-            margin-top: 10px;
-            margin-bottom: 2px;
-            font-size: 0.8em;
-        }
-        /* Chat styling */
-        .chat-message {
-            margin-bottom: 5px;
-        }
-        .chat-message .chat-username {
-            font-weight: bold;
-        }
-        .chat-message .chat-text {
-            margin-left: 5px;
-        }
-        .chat-message.chat-info {
-            font-style: italic;
-        }
-        /* Players styling */
-        .player {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        
 
     </style>
 </head>

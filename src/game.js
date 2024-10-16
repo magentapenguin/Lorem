@@ -31,6 +31,7 @@ const k = kaplay({
     debugKey: "i",
     width: 835,
     height: 640,
+    letterbox: true,
     canvas: document.getElementById("game"),
     global: false,
     buttons: {
@@ -357,6 +358,11 @@ k.scene("menu", () => {
 k.scene("game", () => {
     // reset cursor to default on frame start for easier cursor management
     k.onUpdate(() => k.setCursor("crosshair"));
+    k.add([
+        k.rect(k.width(), k.height()),
+        k.z(-5),
+        k.color(80, 80, 80),
+    ])
     const player = k.add([
         k.sprite("bean"),
         k.pos(k.width() / 2, k.height() / 2),
@@ -535,7 +541,7 @@ k.scene("game", () => {
     setInterval(() => {
         ws.send(JSON.stringify(["ping"]));
     }, 30000);
-    backbtn("dark", () => {
+    backbtn("light", () => {
         ws.close();
         k.go("menu");
     });
