@@ -26,7 +26,7 @@ export default class WebSocketServer {
       if (data[0] === 'close') {
         this.rooms = this.rooms.filter(r => r !== data[1]);
       }
-      this.room.storage.set('rooms', this.rooms);
+      this.room.storage.put('rooms', this.rooms);
     }
   }
 }

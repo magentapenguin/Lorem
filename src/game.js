@@ -3,7 +3,7 @@ import PartySocket from "partysocket";
 
 /** @type {PartySocket} */
 var ws;
-const HOST = "https://special-train-qxjj45w76jw29vvw-1999.app.github.dev/";
+const HOST = "https://lorem-ipsum-game.magentapenguin.partykit.dev/";
 
 
 function wsinit() {

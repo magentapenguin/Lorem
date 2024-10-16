@@ -40,8 +40,8 @@ export default class WebSocketServer {
   }
   updateSides() {
     const connections = this.room.getConnections();
-    const first = connections[0]?.state.side;
-    const second = connections[1]?.state.side;
+    const first = connections[0].state?.side;
+    const second = connections[1].state?.side;
     // assign sides
     if (first && !second) {
       connections[1].setState({ side: first === 'left' ? 'right' : 'left'});
