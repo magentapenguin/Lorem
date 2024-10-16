@@ -1,7 +1,10 @@
 {
   "$schema": "https://www.partykit.io/schema.json",
   "name": "lorem-ipsum-game",
-  "main": "party/index.js",
+  "main": "party/game.js",
+  "parties": {
+    "connections": "party/connections.js"
+  },
   "compatibilityDate": "2024-08-26",
   "serve": {
     "path": "public",

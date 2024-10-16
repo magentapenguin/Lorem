@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "npx partykit dev",
-    "publish": "npx partykit deploy"
+    "publish": "npx partykit deploy",
+    "tail": "npx partykit tail"
   }
 }

@@ -44,17 +44,17 @@ export default class WebSocketServer {
     const second = connections[1]?.state.side;
     // assign sides
     if (first && !second) {
-      connections[1].state.side = first === 'left' ? 'right' : 'left';
+      connections[1].setState({ side: first === 'left' ? 'right' : 'left'});
       connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
     }
     if (!first && second) {
-      connections[0].state.side = second === 'left' ? 'right' : 'left';
+      connections[0].setState({ side: second === 'left' ? 'right' : 'left'});
       connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
     }
     if (!first && !second) {
-      connections[0].state.side = 'left';
+      connections[0].setState({ side: 'left'});
       connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
-      connections[1].state.side = 'right';
+      connections[1].setState({ side: 'right'});
       connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
     }
   }
