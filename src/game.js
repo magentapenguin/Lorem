@@ -35,15 +35,15 @@ const k = kaplay({
     global: false,
     buttons: {
         up: {
-            keys: ["w", "arrowup"],
+            keyboard: ["w", "up"],
             gamepad: "dpadUp",
         },
         down: {
-            keys: ["s", "arrowdown"],
+            keyboard: ["s", "down"],
             gamepad: "dpadDown",
         },
         fire: {
-            keys: ["space", "enter"],
+            keyboard: ["space", "enter"],
             mouse: "left",
             gamepad: "buttonA",
         },
@@ -75,6 +75,7 @@ k.loadSprite("btn-light", "/static/btn-light.png", { slice9: {top: 3*scale, bott
 k.loadSprite("btn-dark-flat", "/static/btn-dark-flat.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
 k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
 
+k.loadSprite("heart", "/static/heart.png", { sliceX: 2 });
 
 
 // Sounds
@@ -361,6 +362,7 @@ k.scene("game", () => {
         k.pos(k.width() / 2, k.height() / 2),
         k.anchor("center"),
         k.area(),
+        k.health(3),
     ]);
 
     const gun = player.add([
@@ -376,6 +378,7 @@ k.scene("game", () => {
         k.pos(k.width() / 2, k.height() / 2),
         k.anchor("center"),
         k.area(),
+        k.health(3),
     ]); 
 
     const altgun = altplayer.add([
@@ -385,6 +388,21 @@ k.scene("game", () => {
         k.rotate(0),
         k.area(),
     ]);
+
+    const lefthearts = [];
+    const righthearts = [];
+    for (let i = 0; i < 3; i++) {
+        lefthearts.push(k.add([
+            k.sprite("heart"),
+            k.pos(120 + 44 * i, 24),
+            k.anchor("center"),
+        ]));
+        righthearts.push(k.add([
+            k.sprite("heart"),
+            k.pos(k.width() - 120 - 44 * i, 24),
+            k.anchor("center"),
+        ]));
+    }
 
     var cooldown = 0;
 
@@ -410,23 +428,34 @@ k.scene("game", () => {
         angleGun(gun, player);
     });
 
-    player.on("update", () => {
-        if (k.isButtonDown("up")) {
-            player.move(0, -200);
-            ws.send(JSON.stringify(["move", player.pos]));
-            angleGun(gun, player);
-        }
-        if (k.isButtonDown("down")) {
-            player.move(0, 200);
-            ws.send(JSON.stringify(["move", player.pos]));
-            angleGun(gun, player);
-        }
+    player.onButtonDown("up", () => {
+        player.move(0, -200);
+        ws.send(JSON.stringify(["move", player.pos.toArray()]));
+        angleGun(gun, player);
     });
 
+    player.onButtonDown("down", () => {
+        player.move(0, 200);
+        ws.send(JSON.stringify(["move", player.pos.toArray()]));
+        angleGun(gun, player);
+    });
+
+    player.on("hurt", () => {
+        ws.send(JSON.stringify(["hurt", player.hp()]));
+        k.play("hit", { volume: 0.9 });
+        k.shake(2);
+    })
+    altplayer.on("hurt", () => {
+        k.play("hit", { volume: 0.9 });
+        k.shake(2);
+    })
     
     // Hit detection
     player.onCollide("bullet-remote", (b) => {
         k.play("hit", { volume: 0.9 });
+        b.destroy();
+    });
+    altplayer.onCollide("bullet-local", (b) => {
         b.destroy();
     });
 
@@ -494,6 +523,9 @@ k.scene("game", () => {
         }
         if (type === "pong") {
             console.log("pong", data);
+        }
+        if (type === "hurt") {
+            altplayer.setHP(data[0]);
         }
     });
     setTimeout(() => {

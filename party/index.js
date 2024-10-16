@@ -30,21 +30,26 @@ export default class WebSocketServer {
       console.log('room is full', this.users.length);
       return;
     }
-    connection.setState({ side: playerCount>1 ? 'right' : 'left' });
-    
-    connection.send(JSON.stringify(['init', connection.id, connection.state.side]));
+    this.updateSides();
     this.room.broadcast(JSON.stringify(['join', connection.id]), [connection.id]);
   }
   // when a client disconnects
   onClose(connection) {
-    
+    this.updateSides();
     this.room.broadcast(JSON.stringify(['leave', connection.id]), [connection.id]);
   }
   updateSides() {
     const connections = this.room.getConnections();
-    for (const [i, conn] of connections.entries()) {
-      conn.setState({ side: i === 0 ? 'left' : 'right' });
-      conn.send(JSON.stringify(['init', conn.id, conn.state.side]));
+    const first = connections[0]?.state.side;
+    const second = connections[1]?.state.side;
+    // assign sides
+    if (first && !second) {
+      connections[1].state.side = first === 'left' ? 'right' : 'left';
+      connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
+    }
+    if (!first && second) {
+      connections[0].state.side = second === 'left' ? 'right' : 'left';
+      connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
     }
   }
 }
