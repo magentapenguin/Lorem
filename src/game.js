@@ -3,7 +3,7 @@ import PartySocket from "partysocket";
 
 /** @type {PartySocket} */
 var ws;
-const HOST = "https://lorem-ipsum-game.magentapenguin.partykit.dev/";
+const HOST = "localhost:1999";
 
 
 function wsinit() {
@@ -31,7 +31,7 @@ const k = kaplay({
     debugKey: "i",
     width: 835,
     height: 640,
-    letterbox: true,
+    //letterbox: true,
     canvas: document.getElementById("game"),
     global: false,
     buttons: {
@@ -49,9 +49,9 @@ const k = kaplay({
             gamepad: "buttonA",
         },
     },
-    crisp: true,
+    //crisp: true,
 
-    background: [255, 255, 255],
+    background: [0, 0, 0],
 });
 
 k.loadSprite("bean", "/static/bean.png");
@@ -63,6 +63,12 @@ k.loadSpriteAtlas("/static/muteunmute.png", {
     "mute-dark": {x: 0, y: 0, width: 60, height: 16, sliceX: 4},
     // Light theme
     "mute-light": {x: 0, y: 16, width: 60, height: 16, sliceX: 4},
+});
+k.loadSpriteAtlas("/static/fullscreen.png", {
+    // Dark theme
+    "fs-dark": {x: 0, y: 0, width: 60, height: 16, sliceX: 4},
+    // Light theme
+    "fs-light": {x: 0, y: 16, width: 60, height: 16, sliceX: 4},
 });
 k.loadSpriteAtlas("/static/back.png", {
     // Dark theme
@@ -127,6 +133,46 @@ function button(x, y, text, action, padding = 10, theme = "light") {
         btn.pos.y = y+padding*0.75-btn.height/2;
     });
     btn.onClick(action);
+    return btn;
+}
+
+
+function fullscreenbtn(theme) {
+    const btn = k.add([
+        k.sprite("fs-"+theme, ),
+        k.pos(k.width()-120, k.height()-48),
+        k.anchor("center"),
+        k.scale(4),
+        k.area(),
+        { mode: false, isHovered: false, isClickedAfterHover: false },
+    ]);
+    console.log(music);
+    if (k.isFullscreen()) {
+        btn.mode = true;
+        btn.frame = 2;
+    }
+    btn.onHover(() => {
+        btn.isHovered = true;
+    });
+    btn.onHoverEnd(() => {
+        btn.isHovered = false;
+    });
+    btn.onHoverUpdate(() => {
+        k.setCursor("pointer");
+    });
+    btn.onMouseDown(() => {
+        if (!btn.isHovered) return;
+        btn.isClickedAfterHover = true;
+        btn.frame = 1+btn.mode*2;
+    });
+    btn.onMouseRelease(() => {
+        if (!btn.isClickedAfterHover) return;
+        btn.isClickedAfterHover = false;
+        
+        btn.mode = !btn.mode;
+        btn.frame = btn.mode*2;
+        k.setFullscreen(btn.mode);
+    });
     return btn;
 }
 
@@ -259,6 +305,7 @@ k.scene("loading", () => {
 k.scene("menu", () => {
     k.onUpdate(() => k.setCursor("default"));
     mutebtn("light");
+    fullscreenbtn("light");
     const a = k.add([
         k.text("Lorem Ipsum", { size: 72, }),
         k.pos(k.width() / 2, k.height() / 2 - 100),

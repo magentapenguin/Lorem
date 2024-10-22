@@ -10,6 +10,7 @@ export default class WebSocketServer {
     const [type, ...data] = JSON.parse(message);
 
     if (type === 'ready') {
+      console.log('ready', sender.state);
       sender.send(JSON.stringify(['init', sender.id, sender.state.side]));
     }
     if (type === 'ping') {
@@ -39,9 +40,13 @@ export default class WebSocketServer {
     this.room.broadcast(JSON.stringify(['leave', connection.id]), [connection.id]);
   }
   updateSides() {
-    const connections = this.room.getConnections();
-    const first = connections[0].state?.side;
-    const second = connections[1].state?.side;
+    const connections = [...this.room.getConnections()];
+    const first = connections[0]?.state?.side;
+    const second = connections[1]?.state?.side;
+    if (connections.length < 2) {
+      console.log('not enough players');
+      return;
+    }
     // assign sides
     if (first && !second) {
       connections[1].setState({ side: first === 'left' ? 'right' : 'left'});
