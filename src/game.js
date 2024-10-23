@@ -31,7 +31,7 @@ const k = kaplay({
     debugKey: "i",
     width: 835,
     height: 640,
-    letterbox: true,
+    //letterbox: true,
     canvas: document.getElementById("game"),
     global: false,
     buttons: {
