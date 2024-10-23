@@ -3,7 +3,7 @@ import PartySocket from "partysocket";
 
 /** @type {PartySocket} */
 var ws;
-const HOST = "localhost:1999";
+const HOST = location.host;//"https://lorem-ipsum-game.magentapenguin.partykit.dev";
 
 
 function wsinit() {
