@@ -561,7 +561,7 @@ k.scene("game", () => {
                 k.area(),
                 k.move(data[1], 400),
                 k.offscreen({ destroy: true }),
-                k.color(64, 64, 64),
+                k.color(255, 255, 128),
                 k.rect(12, 5, { radius: 2 }),
                 "bullet-remote",
             ]);
