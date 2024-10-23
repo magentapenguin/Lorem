@@ -41,7 +41,9 @@ export default class WebSocketServer {
   }
   updateSides() {
     const connections = [...this.room.getConnections()];
-    const first = connections[0]?.state?.side;
+    if (connections.length === 0) return;
+    console.log('update sides', connections.map(c => c.id));
+    const first = connections[0].state?.side;
     const second = connections[1]?.state?.side;
     // assign sides
     if (!first && !second) {

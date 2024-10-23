@@ -31,7 +31,7 @@ const k = kaplay({
     debugKey: "i",
     width: 835,
     height: 640,
-    //letterbox: true,
+    letterbox: true,
     canvas: document.getElementById("game"),
     global: false,
     buttons: {
@@ -417,6 +417,7 @@ k.scene("game", () => {
         k.anchor("center"),
         k.area(),
         k.health(3),
+        { side: null },
     ]);
 
     const gun = player.add([
@@ -433,6 +434,7 @@ k.scene("game", () => {
         k.anchor("center"),
         k.area(),
         k.health(3),
+        { side: null },
     ]); 
 
     const altgun = altplayer.add([
@@ -467,6 +469,16 @@ k.scene("game", () => {
         k.pos(0, 0),
         "bullets",
     ]);
+
+    function updateHearts(side, hp) {
+        for (let i = 0; i < 3; i++) {
+            if (i < hp) {
+                side[i].frame = 0;
+            } else {
+                side[i].frame = 1;
+            }
+        }
+    }
 
     function angleGun(gun, player, angle, send = true) {
         gun.angle = angle ?? k.mousePos().sub(player.pos).angle();
@@ -506,7 +518,7 @@ k.scene("game", () => {
     
     // Hit detection
     player.onCollide("bullet-remote", (b) => {
-        k.play("hit", { volume: 0.9 });
+        player.hurt(1);
         b.destroy();
     });
     altplayer.onCollide("bullet-local", (b) => {
@@ -535,6 +547,8 @@ k.scene("game", () => {
             ws.send(JSON.stringify(["fire", b.pos.toArray(), angle]));
         }
     });
+
+
     
     ws.addEventListener("message", (e) => {
         console.log(e.data);
@@ -574,12 +588,15 @@ k.scene("game", () => {
             console.log("init", data[1]);
             player.pos = data[1] == "left" ? k.vec2(70, k.height() / 2) : k.vec2(k.width() - 70, k.height() / 2);
             altplayer.pos = data[1] == "left" ? k.vec2(k.width() - 70, k.height() / 2) : k.vec2(70, k.height() / 2);
+            player.side = data[1];
+            altplayer.side = data[1] == "left" ? "right" : "left";
         }
         if (type === "pong") {
             console.log("pong", data);
         }
         if (type === "hurt") {
             altplayer.setHP(data[0]);
+            updateHearts()
         }
     });
     setTimeout(() => {
