@@ -171,6 +171,7 @@ function fullscreenbtn(theme) {
         
         btn.mode = !btn.mode;
         btn.frame = btn.mode*2;
+        
         k.setFullscreen(btn.mode);
     });
     return btn;
@@ -527,7 +528,7 @@ k.scene("game", () => {
                 k.area(),
                 k.move(angle, 400),
                 k.offscreen({ destroy: true }),
-                k.color(64, 64, 64),
+                k.color(255, 255, 128),
                 k.rect(12, 5, { radius: 2 }),
                 "bullet-local",
             ]);

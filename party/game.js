@@ -28,7 +28,7 @@ export default class WebSocketServer {
     if (playerCount > 2) {
       connection.send(JSON.stringify(['full']));
       connection.close();
-      console.log('room is full', this.users.length);
+      console.log('room is full', playerCount);
       return;
     }
     this.updateSides();
@@ -43,11 +43,14 @@ export default class WebSocketServer {
     const connections = [...this.room.getConnections()];
     const first = connections[0]?.state?.side;
     const second = connections[1]?.state?.side;
-    if (connections.length < 2) {
-      console.log('not enough players');
-      return;
-    }
     // assign sides
+    if (!first && !second) {
+      connections[0].setState({ side: 'left'});
+      connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
+      connections[1].setState({ side: 'right'});
+      connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
+    }
+    if (connections.length < 2) return;
     if (first && !second) {
       connections[1].setState({ side: first === 'left' ? 'right' : 'left'});
       connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
@@ -56,13 +59,5 @@ export default class WebSocketServer {
       connections[0].setState({ side: second === 'left' ? 'right' : 'left'});
       connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
     }
-    if (!first && !second) {
-      connections[0].setState({ side: 'left'});
-      connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
-      connections[1].setState({ side: 'right'});
-      connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
-    }
   }
 }
-
-
