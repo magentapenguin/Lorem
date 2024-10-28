@@ -10,6 +10,7 @@ function wsinit() {
     ws.addEventListener("close", () => {
         console.warn("connection closed");
         k.debug.log("connection closed");
+        k.go("menu");
     });
 }
 
@@ -60,27 +61,27 @@ k.loadSprite("github", "/static/github.png");
 k.loadSprite("discord", "/static/discord.png");
 k.loadSpriteAtlas("/static/muteunmute.png", {
     // Dark theme
-    "mute-dark": {x: 0, y: 0, width: 60, height: 16, sliceX: 4},
+    "mute-dark": { x: 0, y: 0, width: 60, height: 16, sliceX: 4 },
     // Light theme
-    "mute-light": {x: 0, y: 16, width: 60, height: 16, sliceX: 4},
+    "mute-light": { x: 0, y: 16, width: 60, height: 16, sliceX: 4 },
 });
 k.loadSpriteAtlas("/static/fullscreen.png", {
     // Dark theme
-    "fs-dark": {x: 0, y: 0, width: 60, height: 16, sliceX: 4},
+    "fs-dark": { x: 0, y: 0, width: 60, height: 16, sliceX: 4 },
     // Light theme
-    "fs-light": {x: 0, y: 16, width: 60, height: 16, sliceX: 4},
+    "fs-light": { x: 0, y: 16, width: 60, height: 16, sliceX: 4 },
 });
 k.loadSpriteAtlas("/static/back.png", {
     // Dark theme
-    "back-dark": {x: 0, y: 0, width: 30, height: 16, sliceX: 2},
+    "back-dark": { x: 0, y: 0, width: 30, height: 16, sliceX: 2 },
     // Light theme
-    "back-light": {x: 0, y: 16, width: 30, height: 16, sliceX: 2},
+    "back-light": { x: 0, y: 16, width: 30, height: 16, sliceX: 2 },
 });
 let scale = 3; // SCALE var from splitbtnsprites.py
-k.loadSprite("btn-dark", "/static/btn-dark.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
-k.loadSprite("btn-light", "/static/btn-light.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
-k.loadSprite("btn-dark-flat", "/static/btn-dark-flat.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
-k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: {top: 3*scale, bottom: 3*scale, left: 2*scale, right: 2*scale} });
+k.loadSprite("btn-dark", "/static/btn-dark.png", { slice9: { top: 3 * scale, bottom: 3 * scale, left: 2 * scale, right: 2 * scale } });
+k.loadSprite("btn-light", "/static/btn-light.png", { slice9: { top: 3 * scale, bottom: 3 * scale, left: 2 * scale, right: 2 * scale } });
+k.loadSprite("btn-dark-flat", "/static/btn-dark-flat.png", { slice9: { top: 3 * scale, bottom: 3 * scale, left: 2 * scale, right: 2 * scale } });
+k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: { top: 3 * scale, bottom: 3 * scale, left: 2 * scale, right: 2 * scale } });
 
 k.loadSprite("heart", "/static/heart.png", { sliceX: 2 });
 
@@ -95,7 +96,7 @@ var music;
 
 function button(x, y, text, action, padding = 10, theme = "light") {
     const txt = k.formatText({
-        pos: k.vec2(padding/2, padding*0.75),
+        pos: k.vec2(padding / 2, padding * 0.75),
         anchor: "topleft",
         align: "center",
         text: text,
@@ -106,13 +107,13 @@ function button(x, y, text, action, padding = 10, theme = "light") {
     console.log(txt.width, txt.height);
 
     const btn = k.add([
-        k.sprite("btn-"+theme),
-        k.pos(x+padding, y+padding*0.75),
+        k.sprite("btn-" + theme),
+        k.pos(x + padding, y + padding * 0.75),
         k.anchor("topleft"),
         k.area(),
         k.scale(1),
     ]);
-    
+
     btn.onDraw(() => {
         k.drawFormattedText(txt)
     });
@@ -126,21 +127,70 @@ function button(x, y, text, action, padding = 10, theme = "light") {
         btn.scaleTo(1);
     });*/
     btn.onUpdate(() => {
-        btn.width = 200+padding*2;
-        btn.height = txt.height+padding*1.5;
-        
-        btn.pos.x = x+padding-btn.width/2;
-        btn.pos.y = y+padding*0.75-btn.height/2;
+        btn.width = 200 + padding * 2;
+        btn.height = txt.height + padding * 1.5;
+
+        btn.pos.x = x + padding - btn.width / 2;
+        btn.pos.y = y + padding * 0.75 - btn.height / 2;
     });
     btn.onClick(action);
     return btn;
 }
 
+var toasts = [];
+
+function toast(title, theme = "dark", padding = 10, timeout = 5000, action = () => { }) {
+    const txt = k.formatText({
+        pos: k.vec2(48, padding / 2),
+        anchor: k.vec2(-1, -1),
+        align: "center",
+        text: title,
+        size: 24,
+        width: 200,
+        color: theme.includes('dark') ? k.rgb(0, 0, 0) : k.rgb(255, 255, 255),
+    });
+    const t = k.add([
+        k.rect(200, txt.height, {
+            radius: 8,
+        }),
+        k.pos(k.width() / 2, k.height() - 48),
+        k.anchor("center"),
+        k.scale(1),
+        k.area(),
+        { title: title },
+    ]);
+    t.onDraw(() => {
+        k.drawFormattedText(txt)
+    });
+    t.onHoverUpdate(() => {
+        k.setCursor("pointer");
+    });
+    t.onHover(() => {
+        t.scaleTo(1.2);
+    });
+    t.onHoverEnd(() => {
+        t.scaleTo(1);
+    });
+    t.onUpdate(() => {
+        t.width = 200 + padding * 2;
+        t.height = txt.height + padding * 1.5;
+
+        t.pos.x = k.width() / 2 + padding;
+        t.pos.y = k.height() - 48 + padding * 0.75 ;
+    });
+    t.onClick(action);
+
+    return t;
+}
+
+toast("Hello", "dark", 10, 5000, () => {
+    console.log("Hello");
+});
 
 function fullscreenbtn(theme) {
     const btn = k.add([
-        k.sprite("fs-"+theme, ),
-        k.pos(k.width()-120, k.height()-48),
+        k.sprite("fs-" + theme,),
+        k.pos(k.width() - 120, k.height() - 48),
         k.anchor("center"),
         k.scale(4),
         k.area(),
@@ -163,15 +213,15 @@ function fullscreenbtn(theme) {
     btn.onMouseDown(() => {
         if (!btn.isHovered) return;
         btn.isClickedAfterHover = true;
-        btn.frame = 1+btn.mode*2;
+        btn.frame = 1 + btn.mode * 2;
     });
     btn.onMouseRelease(() => {
         if (!btn.isClickedAfterHover) return;
         btn.isClickedAfterHover = false;
-        
+
         btn.mode = !btn.mode;
-        btn.frame = btn.mode*2;
-        
+        btn.frame = btn.mode * 2;
+
         k.setFullscreen(btn.mode);
     });
     return btn;
@@ -179,8 +229,8 @@ function fullscreenbtn(theme) {
 
 function mutebtn(theme) {
     const btn = k.add([
-        k.sprite("mute-"+theme, ),
-        k.pos(k.width()-48, k.height()-48),
+        k.sprite("mute-" + theme,),
+        k.pos(k.width() - 48, k.height() - 48),
         k.anchor("center"),
         k.scale(4),
         k.area(),
@@ -203,7 +253,7 @@ function mutebtn(theme) {
     btn.onMouseDown(() => {
         if (!btn.isHovered) return;
         btn.isClickedAfterHover = true;
-        btn.frame = 1+btn.mode*2;
+        btn.frame = 1 + btn.mode * 2;
     });
     btn.onMouseRelease(() => {
         if (!btn.isClickedAfterHover) return;
@@ -214,15 +264,15 @@ function mutebtn(theme) {
             music = k.play("music", { loop: true, volume: 0.5 });
         }
         btn.mode = !btn.mode;
-        btn.frame = btn.mode*2;
+        btn.frame = btn.mode * 2;
     });
     return btn;
 }
 
 
-function backbtn(theme,callback) {
+function backbtn(theme, callback) {
     const btn = k.add([
-        k.sprite("back-"+theme, ),
+        k.sprite("back-" + theme,),
         k.pos(48, 48),
         k.anchor("center"),
         k.scale(4),
@@ -252,6 +302,30 @@ function backbtn(theme,callback) {
     return btn;
 }
 
+// technically async
+// returns a promise
+function queryServer(info) {
+    return new Promise((resolve, reject) => {
+        ws = new PartySocket({
+            host: HOST,
+            party: "connect",
+            room: "game",
+        });
+        ws.addEventListener('open', () => {
+            setTimeout(() => ws.send(JSON.stringify(info)), 100);
+        });
+        ws.addEventListener('message', (e) => {
+            console.log(e.data);
+            resolve(JSON.parse(e.data));
+        });
+        ws.addEventListener('close', () => {
+            console.warn("connection closed");
+            reject("Connection closed");
+        });
+    });
+
+}
+
 
 k.loadShader("checkerbg", null, `
     uniform float u_time;
@@ -278,6 +352,7 @@ k.loadShader("checkerbg", null, `
 `)
 
 k.scene("loading", () => {
+    k.onUpdate(() => k.setCursor("default"));
     k.add([
         k.text("Loading...", { size: 48 }),
         k.pos(k.width() / 2, k.height() / 2),
@@ -315,14 +390,14 @@ k.scene("menu", () => {
     ]);
     // funni lil line
     k.add([
-        k.rect(a.width/1.1, 3),
-        k.pos(a.pos.x, a.pos.y+a.height/2-10),
+        k.rect(a.width / 1.1, 3),
+        k.pos(a.pos.x, a.pos.y + a.height / 2 - 10),
         k.anchor("center"),
         k.color(255, 255, 255),
     ]);
     k.add([
         k.text("The game that is in development", { size: 20, }),
-        k.pos(a.pos.x, a.pos.y+a.height/2+5),
+        k.pos(a.pos.x, a.pos.y + a.height / 2 + 5),
         k.anchor("center"),
         k.area(),
     ]);
@@ -330,7 +405,7 @@ k.scene("menu", () => {
     const logo = (y, name, text, url, color) => {
         const a = k.add([
             k.sprite(name),
-            k.pos(50, k.height() - ((1+y)*50)),
+            k.pos(50, k.height() - ((1 + y) * 50)),
             k.anchor("center"),
             k.area(),
             k.scale(0.5),
@@ -344,12 +419,12 @@ k.scene("menu", () => {
         });
         const t = a.add([
             k.text(text, { size: 56, }),
-            k.pos(48,0),
+            k.pos(48, 0),
             k.anchor("left"),
             k.area(),
             k.color(color),
 
-        ]); 
+        ]);
         //t.width = 0;
         a.onHover(() => {
             if (a.curtween) a.curtween.cancel();
@@ -361,7 +436,7 @@ k.scene("menu", () => {
         });
         return a;
     }
-    
+
     logo(0, "github", "Github", "https://github.com/magentapenguin/Lorem", "#FFFFFF");
     logo(1, "discord", "Discord", "https://discord.gg/qrkdS85Wcn", "#5766F2");
 
@@ -380,27 +455,82 @@ k.scene("menu", () => {
         })),
     ])
     button(k.width() / 2, k.height() / 2, "Join Room", () => {
-
-        if (ws) ws.close();
-        ws = new PartySocket({
-            host: HOST,
-            room: "connect",
-        });
-        wsinit();
-        ws.addEventListener('open',() => {
-            k.go("game");
-        })
-        k.go("loading");
+        k.go("joinroom");
     });
 
     button(k.width() / 2, k.height() / 2 + 50, "Create Room", () => {
-        k.debug.log("Creating room");
+        toast("Hello", "dark", 10, 5000, () => {
+            console.log("Hello");
+        });        
     });
 
     button(k.width() / 2, k.height() / 2 + 100, "Settings", () => {
         k.debug.log("Settings");
     });
 });
+
+k.scene("joinroom", () => {
+    k.onUpdate(() => k.setCursor("default"));
+    // bg
+    k.add([
+        k.rect(k.width(), k.height()),
+        k.z(-5),
+        k.shader("checkerbg", () => ({
+            "u_time": k.time() / 10,
+            "u_color1": k.rgb(40, 40, 40),
+            "u_color2": k.rgb(60, 60, 60),
+            "u_speed": k.vec2(0.5, -0.25),
+            "u_angle": 15,
+            "u_scale": 4,
+            "u_aspect": k.width() / k.height(),
+        })),
+    ]);
+    k.add([
+        k.text("Join Room", { size: 72, }),
+        k.pos(k.width() / 2, k.height() / 2 - 100),
+        k.anchor("center"),
+        k.area(),
+    ]);
+    // select mode
+    button(k.width() / 2, k.height() / 2, "Join Random Room", () => {
+        queryServer(["find"]).then(data => {
+            if (ws) ws.close();
+            ws = new PartySocket({
+                host: HOST,
+                room: data[1],
+            });
+            wsinit();
+            ws.addEventListener('open', () => {
+                k.go("game");
+            })
+            k.go("loading");
+        });
+    });
+    button(k.width() / 2, k.height() / 2 + 70, "Join Specific Room", () => {
+        let code = prompt("Enter room code");
+        queryServer(["check", code]).then(data => {
+            if (!data[1]) {
+                k.debug.log("Room not found");
+                return;
+            }
+            if (ws) ws.close();
+            ws = new PartySocket({
+                host: HOST,
+                room: code,
+            });
+            wsinit();
+            ws.addEventListener('open', () => {
+                k.go("game");
+            })
+            k.go("loading");
+        });
+    });
+    backbtn("light", () => {
+        k.go("menu");
+    });
+});
+
+
 
 
 k.scene("game", () => {
@@ -435,7 +565,7 @@ k.scene("game", () => {
         k.area(),
         k.health(3),
         { side: null },
-    ]); 
+    ]);
 
     const altgun = altplayer.add([
         k.pos(0, 0),
@@ -515,7 +645,7 @@ k.scene("game", () => {
         k.play("hit", { volume: 0.9 });
         k.shake(2);
     })
-    
+
     // Hit detection
     player.onCollide("bullet-remote", (b) => {
         player.hurt(1);
@@ -532,9 +662,9 @@ k.scene("game", () => {
             if (cooldown > 0) return;
             cooldown += 0.5;
             k.play("pew", { volume: 0.8 });
-            let angle = gun.angle+k.randi(-2, 2);
+            let angle = gun.angle + k.randi(-2, 2);
             const b = bullets.add([
-                k.pos(k.Vec2.fromAngle(gun.angle).scale(gun.width*1.5).add(player.pos)),
+                k.pos(k.Vec2.fromAngle(gun.angle).scale(gun.width * 1.5).add(player.pos)),
                 k.anchor("center"),
                 k.rotate(angle),
                 k.area(),
@@ -549,7 +679,7 @@ k.scene("game", () => {
     });
 
 
-    
+
     ws.addEventListener("message", (e) => {
         console.log(e.data);
         const [type, ...data] = JSON.parse(e.data);

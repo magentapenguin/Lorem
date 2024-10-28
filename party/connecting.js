@@ -1,13 +1,14 @@
-export default class WebSocketServer {
+export default class ConnectionServer {
 
   constructor(room) {
     this.room = room;
+    this.rooms = null;
   }
   // when a client sends a message
   async onMessage(message, sender) {
     const [type, ...data] = JSON.parse(message);
     // get room ids from storage
-    this.rooms = this.rooms ?? await this.room.storage.get('rooms');
+    this.rooms = this.rooms ?? await this.room.storage.get('rooms') ?? [];
     if (type === 'find') {
       // select a room randomly
       let room = this.rooms[Math.floor(Math.random() * this.rooms.length)];

@@ -1,7 +1,7 @@
 // Code: party/index.js
 // Using partykit, we can create a simple server that will handle the game logic and communication with the clients.
 
-export default class WebSocketServer {
+export default class GameServer {
   constructor(room) {
     this.room = room;
   }
@@ -22,7 +22,7 @@ export default class WebSocketServer {
     this.room.broadcast(message, [sender.id]);
   }
   // when a new client connects
-  onConnect(connection) {
+  async onConnect(connection) {
     // disconnect if over capacity
     const playerCount = [...this.room.getConnections()].length;
     if (playerCount > 2) {
@@ -31,11 +31,21 @@ export default class WebSocketServer {
       console.log('room is full', playerCount);
       return;
     }
+    if (playerCount > 0) {
+      // update server to include current room
+      this.room.context.parties.connect.get('game').socket().then(s => s.send(JSON.stringify(['update', 'open', this.room.id])));
+    }
+
     this.updateSides();
     this.room.broadcast(JSON.stringify(['join', connection.id]), [connection.id]);
   }
   // when a client disconnects
   onClose(connection) {
+    const playerCount = [...this.room.getConnections()].length;
+    if (playerCount <= 0) {
+      // update server to exclude current room
+      this.room.context.parties.connect.get('game').socket().then(s => s.send(JSON.stringify(['update', 'close', this.room.id])));
+    }
     this.updateSides();
     this.room.broadcast(JSON.stringify(['leave', connection.id]), [connection.id]);
   }
@@ -47,10 +57,10 @@ export default class WebSocketServer {
     const second = connections[1]?.state?.side;
     // assign sides
     if (!first && !second) {
-      connections[0].setState({ side: 'left'});
+      connections[0].setState({ side: 'left' });
       connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
       try {
-        connections[1].setState({ side: 'right'});
+        connections[1].setState({ side: 'right' });
         connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
       } catch (e) {
         console.error(e);
@@ -58,11 +68,11 @@ export default class WebSocketServer {
     }
     if (connections.length < 2) return;
     if (first && !second) {
-      connections[1].setState({ side: first === 'left' ? 'right' : 'left'});
+      connections[1].setState({ side: first === 'left' ? 'right' : 'left' });
       connections[1].send(JSON.stringify(['init', connections[1].id, connections[1].state.side]));
     }
     if (!first && second) {
-      connections[0].setState({ side: second === 'left' ? 'right' : 'left'});
+      connections[0].setState({ side: second === 'left' ? 'right' : 'left' });
       connections[0].send(JSON.stringify(['init', connections[0].id, connections[0].state.side]));
     }
   }

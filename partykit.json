@@ -3,7 +3,7 @@
   "name": "lorem-ipsum-game",
   "main": "party/game.js",
   "parties": {
-    "connecting": "party/connecting.js"
+    "connect": "party/connecting.js"
   },
   "compatibilityDate": "2024-08-26",
   "serve": {
