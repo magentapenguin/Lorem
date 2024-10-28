@@ -85,6 +85,8 @@ k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: { top: 3 
 
 k.loadSprite("heart", "/static/heart.png", { sliceX: 2 });
 
+k.loadSprite("bob", "/static/bob.png");
+
 
 // Sounds
 k.loadSound("hit", "/static/audio/hit.mp3");
@@ -408,7 +410,7 @@ k.scene("menu", () => {
             k.pos(50, k.height() - ((1 + y) * 50)),
             k.anchor("center"),
             k.area(),
-            k.scale(0.5),
+            k.scale(0.75),
             { curtween: null },
         ]);
         a.onHoverUpdate(() => {
@@ -428,11 +430,11 @@ k.scene("menu", () => {
         //t.width = 0;
         a.onHover(() => {
             if (a.curtween) a.curtween.cancel();
-            a.curtween = k.tween(a.scale.x, 0.8, 0.1, (w) => a.scaleTo(w), k.easings.easeOutExpo);
+            a.curtween = k.tween(a.scale.x, 0.9, 0.1, (w) => a.scaleTo(w), k.easings.easeOutExpo);
         })
         a.onHoverEnd(() => {
             if (a.curtween) a.curtween.cancel();
-            a.curtween = k.tween(a.scale.x, 0.5, 0.1, (w) => a.scaleTo(w), k.easings.easeOutExpo);
+            a.curtween = k.tween(a.scale.x, 0.75, 0.1, (w) => a.scaleTo(w), k.easings.easeOutExpo);
         });
         return a;
     }
@@ -574,6 +576,7 @@ k.scene("game", () => {
         k.rotate(0),
         k.area(),
     ]);
+
 
     const lefthearts = [];
     const righthearts = [];
