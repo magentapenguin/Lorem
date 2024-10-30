@@ -1,9 +1,10 @@
 {
   "dependencies": {
-    "kaplay": "^4000.0.0-alpha.5",
+    "kaplay": "^4000.0.0-alpha.14",
     "partysocket": "1.0.2"
   },
   "devDependencies": {
+    "nanoid": "^5.0.8",
     "partykit": "0.0.110"
   },
   "scripts": {

@@ -9,8 +9,7 @@ const HOST = location.host;//"https://lorem-ipsum-game.magentapenguin.partykit.d
 function wsinit() {
     ws.addEventListener("close", () => {
         console.warn("connection closed");
-        k.debug.log("connection closed");
-        k.go("menu");
+        k.debug.error("connection closed");
     });
 }
 
@@ -86,6 +85,7 @@ k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: { top: 3 
 k.loadSprite("heart", "/static/heart.png", { sliceX: 2 });
 
 k.loadSprite("bob", "/static/bob.png");
+k.loadSprite("copy", "/static/copy.png", { sliceX: 2 });
 
 
 // Sounds
@@ -143,45 +143,41 @@ var toasts = [];
 
 function toast(title, theme = "dark", padding = 10, timeout = 5000, action = () => { }) {
     const txt = k.formatText({
-        pos: k.vec2(48, padding / 2),
-        anchor: k.vec2(-1, -1),
+        pos: k.vec2(padding / 2, padding * 0.75),
+        anchor: "topleft",
         align: "center",
         text: title,
         size: 24,
         width: 200,
         color: theme.includes('dark') ? k.rgb(0, 0, 0) : k.rgb(255, 255, 255),
     });
+    console.log(txt.width, txt.height);
     const t = k.add([
-        k.rect(200, txt.height, {
-            radius: 8,
-        }),
+        k.sprite("btn-" + theme),
         k.pos(k.width() / 2, k.height() - 48),
         k.anchor("center"),
-        k.scale(1),
         k.area(),
-        { title: title },
+        k.scale(1),
+        { timeout: timeout },
     ]);
+
     t.onDraw(() => {
         k.drawFormattedText(txt)
     });
     t.onHoverUpdate(() => {
         k.setCursor("pointer");
     });
-    t.onHover(() => {
-        t.scaleTo(1.2);
-    });
-    t.onHoverEnd(() => {
-        t.scaleTo(1);
-    });
     t.onUpdate(() => {
         t.width = 200 + padding * 2;
         t.height = txt.height + padding * 1.5;
 
-        t.pos.x = k.width() / 2 + padding;
-        t.pos.y = k.height() - 48 + padding * 0.75 ;
+        t.pos.x = k.width() / 2 - t.width / 2;
+        t.pos.y = k.height() - 48 - t.height / 2;
+        t.timeout -= k.dt();
+        if (t.timeout < 0) {
+            t.destroy();
+        }
     });
-    t.onClick(action);
-
     return t;
 }
 
@@ -461,13 +457,22 @@ k.scene("menu", () => {
     });
 
     button(k.width() / 2, k.height() / 2 + 50, "Create Room", () => {
-        toast("Hello", "dark", 10, 5000, () => {
-            console.log("Hello");
-        });        
+        queryServer(["create"]).then(data => {
+            if (ws) ws.close();
+            ws = new PartySocket({
+                host: HOST,
+                room: data[1],
+            });
+            wsinit();
+            ws.addEventListener('open', () => {
+                k.go("game");
+            })
+            k.go("loading");
+        });
     });
 
     button(k.width() / 2, k.height() / 2 + 100, "Settings", () => {
-        k.debug.log("Settings");
+        k.debug.error("Settings");
     });
 });
 
@@ -496,6 +501,10 @@ k.scene("joinroom", () => {
     // select mode
     button(k.width() / 2, k.height() / 2, "Join Random Room", () => {
         queryServer(["find"]).then(data => {
+            if (!data[1]) {
+                k.debug.log("No rooms found");
+                return;
+            }
             if (ws) ws.close();
             ws = new PartySocket({
                 host: HOST,
@@ -603,7 +612,41 @@ k.scene("game", () => {
         "bullets",
     ]);
 
-    function updateHearts(side, hp) {
+    k.add([
+        k.text("Room code:", { size: 24 }),
+        k.pos(k.width() / 2, 17),
+        k.anchor("center"),
+    ]);
+    const rmid = k.add([
+        k.text(ws.room, { size: 24 }),
+        k.pos(k.width() / 2, 45),
+        k.anchor("center"),
+    ]);
+    const cprmid = k.add([
+        k.sprite("copy"),
+        k.pos(k.width() / 2+rmid.width/2+10, 45),
+        k.anchor(k.vec2(-0.5, 0)),
+        k.scale(0.9),
+        k.area(),
+    ]);
+    cprmid.onHoverUpdate(() => {
+        k.setCursor("pointer");
+    });
+    cprmid.onClick(() => {
+        // Copy to clipboard
+        navigator.clipboard.writeText(ws.room).then(() => {
+            cprmid.frame = 1;
+            setTimeout(() => {
+                cprmid.frame = 0;
+            }, 1000);
+        });
+    });
+    rmid.pos.x -= cprmid.width / 2;
+    cprmid.pos.x -= cprmid.width / 2;
+
+
+    function updateHearts(strside, hp) {
+        const side = strside == "left" ? lefthearts : righthearts;
         for (let i = 0; i < 3; i++) {
             if (i < hp) {
                 side[i].frame = 0;
@@ -641,6 +684,7 @@ k.scene("game", () => {
 
     player.on("hurt", () => {
         ws.send(JSON.stringify(["hurt", player.hp()]));
+        updateHearts(player.side, player.hp());
         k.play("hit", { volume: 0.9 });
         k.shake(2);
     })
@@ -729,7 +773,7 @@ k.scene("game", () => {
         }
         if (type === "hurt") {
             altplayer.setHP(data[0]);
-            updateHearts()
+            updateHearts(altplayer.side, data[0]);
         }
     });
     setTimeout(() => {
