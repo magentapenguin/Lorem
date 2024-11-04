@@ -1,5 +1,5 @@
 import { customAlphabet } from 'nanoid';
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const alphabet = '6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz';
 const nanoid = customAlphabet(alphabet, 6);
 
 export default class ConnectionServer {

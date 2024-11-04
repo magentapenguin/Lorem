@@ -85,13 +85,18 @@ k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: { top: 3 
 k.loadSprite("heart", "/static/heart.png", { sliceX: 2 });
 
 k.loadSprite("bob", "/static/bob.png");
-k.loadSprite("copy", "/static/copy.png", { sliceX: 2 });
+k.loadSprite("copy", "/static/copy.png", { sliceX: 8, 
+    anims: { 
+        icon: 0,
+        copy: { from: 0, to: 7, loop: false, speed: 20 } 
+    } 
+});
 
 
 // Sounds
 k.loadSound("hit", "/static/audio/hit.mp3");
 k.loadSound("pew", "/static/audio/pew.mp3");
-k.loadSound("music", "/static/audio/song.mp3");
+k.loadMusic("music", "/static/audio/Voice Over Under.mp3");
 
 
 var music;
@@ -177,7 +182,7 @@ function toast(title, theme = "dark", padding = 10, timeout = 5000, action = () 
         if (t.timeout < 0) {
             t.destroy();
         }
-    });
+    }); 
     return t;
 }
 
@@ -635,7 +640,7 @@ k.scene("game", () => {
     cprmid.onClick(() => {
         // Copy to clipboard
         navigator.clipboard.writeText(ws.room).then(() => {
-            cprmid.frame = 1;
+            cprmid.play('copy')
             setTimeout(() => {
                 cprmid.frame = 0;
             }, 1000);
