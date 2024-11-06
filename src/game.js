@@ -607,6 +607,22 @@ k.scene("game", () => {
         ]));
     }
 
+    // line to show movement limits for p1
+    k.add([
+        k.rect(3, k.height()-60),
+        k.pos(70, 30),
+        k.color(0, 0, 0),
+        k.opacity(0.5),
+        k.z(-1)
+    ]);
+    k.add([
+        k.rect(3, k.height()-60),
+        k.pos(k.width() - 70, 30),
+        k.color(0, 0, 0),
+        k.opacity(0.5),
+        k.z(-1)
+    ]);
+
     var cooldown = 0;
 
     const bullets = k.add([
@@ -795,3 +811,23 @@ k.scene("game", () => {
 });
 
 k.go("menu");
+k.onError((e) => {
+    console.error(e);
+    k.debug.error(e);
+    // draw custom error screen
+    k.add([
+        k.text("Uh Oh!", { size: 48 }),
+        k.pos(k.width() / 2, k.height() / 2),
+        k.anchor("center"),
+    ]);
+    k.add([
+        k.text("An error has occurred", { size: 24 }),
+        k.pos(k.width() / 2, k.height() / 2 + 50),
+        k.anchor("center"),
+    ]);
+    k.add([
+        k.text("Please refresh the page", { size: 24 }),
+        k.pos(k.width() / 2, k.height() / 2 + 100),
+        k.anchor("center"),
+    ]);
+});
