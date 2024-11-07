@@ -665,7 +665,7 @@ k.scene("game", () => {
             if (cooldown > 0) return;
             cooldown += 0.5;
             k.play("pew", { volume: 0.8 });
-            let angle = gun.angle + k.randi(-2, 2);
+            let angle = gun.angle + k.randi(-1.5, 1.5);
             const b = bullets.add([
                 k.pos(k.Vec2.fromAngle(gun.angle).scale(gun.width * 1.5).add(player.pos)),
                 k.anchor("center"),
