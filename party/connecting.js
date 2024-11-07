@@ -1,3 +1,7 @@
+import { customAlphabet } from 'nanoid';
+const alphabet = '6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz';
+const nanoid = customAlphabet(alphabet, 6);
+
 export default class ConnectionServer {
 
   constructor(room) {
@@ -28,6 +32,12 @@ export default class ConnectionServer {
         this.rooms = this.rooms.filter(r => r !== data[1]);
       }
       this.room.storage.put('rooms', this.rooms);
+    }
+
+    if (type === 'create') {
+      // create a new room
+      let room = nanoid();
+      sender.send(JSON.stringify(['room', room]));
     }
   }
 }

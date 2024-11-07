@@ -8,7 +8,7 @@
     <meta name="description" content="The game that is in development">
     <meta name="keywords" content="game, shooter, multiplayer">
     <meta name="author" content="magentapenguin">
-
+    
     <!--Open Graph-->
     <meta property="og:title" content="Lorem">
     <meta property="og:description" content="The game that is in development">
@@ -38,31 +38,98 @@
         ::-webkit-scrollbar {
             display: none;
         }
-        /*
         #game {
             max-width: 835px;
             max-height: 640px;
-        }*/
-
+        }
+        #credits {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 1.5em;
+            padding: 1em;
+            display: none;
+        }
+        #credits-close {
+            position: absolute;
+            top: 1em;
+            right: 1em;
+            width: 2em;
+            height: 2em;
+            fill: white;
+            cursor: pointer;
+            vertical-align: -0.125em;
+        }
+        #credits-open {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            color: rgb(0, 0, 0);
+            padding: 0.5em 1em;
+            cursor: pointer;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        :any-link {
+            color: rgb(61, 164, 224);
+        }
+        :any-link:hover {
+            color: rgb(85, 173, 224);
+        }
+        :any-link:active {
+            color: rgb(32, 210, 255);
+        }
     </style>
 </head>
 <body>
     <canvas id="game"></canvas>
-    <!--<div id="console">
-        <div id="console-resize">
-            eeeee
-        </div>
-        <div id="chat">
-            <div id="chat-messages"></div>
-            <form id="chat-form">
-                <input type="text" id="chat-input" placeholder="Type here...">
-                <button id="chat-send" type="button">Send</button>
-            </form>
-        </div>
-        <span id="p-text">Players</span>
-        <div id="players"></div>
-    </div>-->
+    <div id="credits">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" id="credits-close"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>
+        <h3>Credits</h3>
+        <p>Game by <a href="https://magentapenguin.itch.io" target="_blank" rel="noopener">magentapenguin</a></p>
+        <p>Music by <a href="https://incompetech.com" target="_blank" rel="nofollow noopener">Kevin MacLeod</a></p>
+        <p>
+            "Voice Over Under" Kevin MacLeod (incompetech.com)<br>
+            Licensed under Creative Commons: By Attribution 4.0 License<br>
+            <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="nofollow noopener">http://creativecommons.org/licenses/by/4.0/</a>
+        </p>
+        <p>Art inspired by <a href="https://kaplayjs.com/crew/" target="_blank" rel="nofollow noopener">KAPLAY</a></p>
+        <p>Sound effects made with <a href="https://drpetter.se/project_sfxr.html" target="_blank" rel="nofollow noopener">sfxr</a></p>
+
+    </div>
+    <div id="credits-open">Credits</div>
     <script src="dist/game.js"></script>
-    <script src="static/console-resize.js"></script>
+    <script>
+        const credits = document.getElementById('credits');
+        const creditsClose = document.getElementById('credits-close');
+        const creditsOpen = document.getElementById('credits-open');
+        creditsOpen.addEventListener('click', () => {
+            credits.style.display = 'block';
+            credits.animate([
+                {opacity: 0},
+                {opacity: 1}
+            ], {
+                duration: 200,
+                easing: 'ease-in-out'
+            });
+        });
+        credits.addEventListener('click', () => {
+            credits.animate([
+                {opacity: 1},
+                {opacity: 0}
+            ], {
+                duration: 200,
+                easing: 'ease-in-out'
+            }).onfinish = () => {
+                credits.style.display = 'none';
+            };
+
+        });
+
+    </script>
 </body>
 </html>
