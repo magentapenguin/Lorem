@@ -1,5 +1,21 @@
 import kaplay from "kaplay"; // Note to copilot: kaplay is the community-driven fork of KaBoom.js
 import PartySocket from "partysocket";
+import Sentry from "@sentry/browser";
+
+Sentry.init({
+  dsn: "https://204653f0a36794f5024242f71fe1cad2@o4506782055596032.ingest.us.sentry.io/4507019575099392",
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+
+  integrations: [
+    // Keep the Replay integration as before
+    Sentry.replayIntegration(),
+
+    // The following is all you need to enable canvas recording with Replay
+    Sentry.replayCanvasIntegration({preserveDrawingBuffer:true}),
+  ],
+});
+
 
 /** @type {PartySocket} */
 var ws;
