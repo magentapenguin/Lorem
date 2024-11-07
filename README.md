@@ -1,5 +1,7 @@
 # Lorem Ipsum
 
+[![Deploy](https://github.com/magentapenguin/Lorem/actions/workflows/deploy.yml/badge.svg)](https://github.com/magentapenguin/Lorem/actions/workflows/deploy.yml)
+
 ## A multiplayer game in development
 
 ### Yes that is the name
