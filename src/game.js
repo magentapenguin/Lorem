@@ -3,7 +3,7 @@ import PartySocket from "partysocket";
 import * as Sentry from "@sentry/browser";
 
 Sentry.init({
-  dsn: "https://204653f0a36794f5024242f71fe1cad2@o4506782055596032.ingest.us.sentry.io/4507019575099392",
+  dsn: "https://c816d20b5304121270582182fd4b3ea6@o4506782055596032.ingest.us.sentry.io/4508248601853952",
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
 
