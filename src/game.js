@@ -10,7 +10,10 @@ Sentry.init({
   integrations: [
     // Keep the Replay integration as before
     Sentry.replayIntegration(),
-
+    Sentry.captureConsoleIntegration(),
+    Sentry.feedbackIntegration({
+        colorScheme: 'light'
+    }),
     // The following is all you need to enable canvas recording with Replay
     Sentry.replayCanvasIntegration({preserveDrawingBuffer:true}),
   ],
