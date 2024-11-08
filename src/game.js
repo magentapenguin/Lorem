@@ -9,7 +9,10 @@ Sentry.init({
 
   integrations: [
     // Keep the Replay integration as before
-    Sentry.replayIntegration(),
+    Sentry.replayIntegration({
+        maskAllText: false,
+        blockAllMedia: false,
+    }),
     Sentry.captureConsoleIntegration(),
     Sentry.feedbackIntegration({
         colorScheme: 'light'
