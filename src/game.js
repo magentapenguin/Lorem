@@ -834,6 +834,7 @@ k.scene("game", () => {
 
 k.go("menu");
 k.onError((e) => {
+    Sentry.captureException(e);
     console.error(e);
     k.debug.error(e);
     // draw custom error screen
