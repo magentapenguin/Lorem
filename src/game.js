@@ -13,7 +13,6 @@ Sentry.init({
         maskAllText: false,
         blockAllMedia: false,
     }),
-    Sentry.captureConsoleIntegration(),
     Sentry.feedbackIntegration({
         colorScheme: 'light'
     }),
