@@ -7,19 +7,18 @@ Sentry.init({
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
 
-    integrations: [
-        // Keep the Replay integration as before
-        Sentry.replayIntegration({
-            maskAllText: false,
-            blockAllMedia: false,
-        }),
-        Sentry.captureConsoleIntegration(),
-        Sentry.feedbackIntegration({
-            colorScheme: 'light'
-        }),
-        // The following is all you need to enable canvas recording with Replay
-        Sentry.replayCanvasIntegration({ preserveDrawingBuffer: true }),
-    ],
+  integrations: [
+    // Keep the Replay integration as before
+    Sentry.replayIntegration({
+        maskAllText: false,
+        blockAllMedia: false,
+    }),
+    Sentry.feedbackIntegration({
+        colorScheme: 'light'
+    }),
+    // The following is all you need to enable canvas recording with Replay
+    Sentry.replayCanvasIntegration({ preserveDrawingBuffer: true }),
+  ],
 });
 
 
