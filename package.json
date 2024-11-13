@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "npx partykit dev",
     "publish": "npx partykit deploy",
+    "deploy": "npx partykit deploy",
     "tail": "npx partykit tail"
   }
 }

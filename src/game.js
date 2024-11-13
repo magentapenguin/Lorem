@@ -3,23 +3,23 @@ import PartySocket from "partysocket";
 import * as Sentry from "@sentry/browser";
 
 Sentry.init({
-  dsn: "https://c816d20b5304121270582182fd4b3ea6@o4506782055596032.ingest.us.sentry.io/4508248601853952",
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
+    dsn: "https://c816d20b5304121270582182fd4b3ea6@o4506782055596032.ingest.us.sentry.io/4508248601853952",
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
 
-  integrations: [
-    // Keep the Replay integration as before
-    Sentry.replayIntegration({
-        maskAllText: false,
-        blockAllMedia: false,
-    }),
-    Sentry.captureConsoleIntegration(),
-    Sentry.feedbackIntegration({
-        colorScheme: 'light'
-    }),
-    // The following is all you need to enable canvas recording with Replay
-    Sentry.replayCanvasIntegration({preserveDrawingBuffer:true}),
-  ],
+    integrations: [
+        // Keep the Replay integration as before
+        Sentry.replayIntegration({
+            maskAllText: false,
+            blockAllMedia: false,
+        }),
+        Sentry.captureConsoleIntegration(),
+        Sentry.feedbackIntegration({
+            colorScheme: 'light'
+        }),
+        // The following is all you need to enable canvas recording with Replay
+        Sentry.replayCanvasIntegration({ preserveDrawingBuffer: true }),
+    ],
 });
 
 
@@ -107,11 +107,12 @@ k.loadSprite("btn-light-flat", "/static/btn-light-flat.png", { slice9: { top: 3 
 k.loadSprite("heart", "/static/heart.png", { sliceX: 2 });
 
 k.loadSprite("bob", "/static/bob.png");
-k.loadSprite("copy", "/static/copy.png", { sliceX: 8, 
-    anims: { 
+k.loadSprite("copy", "/static/copy.png", {
+    sliceX: 8,
+    anims: {
         icon: 0,
-        copy: { from: 0, to: 7, loop: false, speed: 20 } 
-    } 
+        copy: { from: 0, to: 7, loop: false, speed: 20 }
+    }
 });
 
 
@@ -204,7 +205,7 @@ function toast(title, theme = "dark", padding = 10, timeout = 5000, action = () 
         if (t.timeout < 0) {
             t.destroy();
         }
-    }); 
+    });
     return t;
 }
 
@@ -631,15 +632,15 @@ k.scene("game", () => {
 
     // line to show movement limits for p1
     k.add([
-        k.rect(3, k.height()-60),
-        k.pos(70, 30),
+        k.rect(3, k.height() - 120),
+        k.pos(70, 60),
         k.color(0, 0, 0),
         k.opacity(0.5),
         k.z(-1)
     ]);
     k.add([
-        k.rect(3, k.height()-60),
-        k.pos(k.width() - 70, 30),
+        k.rect(3, k.height() - 120),
+        k.pos(k.width() - 70, 60),
         k.color(0, 0, 0),
         k.opacity(0.5),
         k.z(-1)
@@ -667,7 +668,7 @@ k.scene("game", () => {
     ]);
     const cprmid = k.add([
         k.sprite("copy"),
-        k.pos(k.width() / 2+rmid.width/2+10, 45),
+        k.pos(k.width() / 2 + rmid.width / 2 + 10, 45),
         k.anchor(k.vec2(-0.5, 0)),
         k.scale(0.9),
         k.area(),
@@ -773,7 +774,6 @@ k.scene("game", () => {
     ws.addEventListener("message", (e) => {
         console.log(e.data);
         const [type, ...data] = JSON.parse(e.data);
-        console.log(type, data);
         if (type === "join") {
             add2chat('joined', data[0], true)
         }
@@ -821,7 +821,6 @@ k.scene("game", () => {
     });
     setTimeout(() => {
         ws.send(JSON.stringify(["ready"]));
-        console.log("ready");
     }, 500);
     setInterval(() => {
         ws.send(JSON.stringify(["ping"]));
