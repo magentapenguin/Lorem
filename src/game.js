@@ -484,6 +484,7 @@ k.scene("menu", () => {
     });
 
     button(k.width() / 2, k.height() / 2 + 50, "Create Room", () => {
+        k.go("loading");
         queryServer(["create"]).then(data => {
             if (ws) ws.close();
             ws = new PartySocket({
@@ -494,7 +495,10 @@ k.scene("menu", () => {
             ws.addEventListener('open', () => {
                 k.go("game");
             })
-            k.go("loading");
+        }).catch(e => {
+            k.debug.error(e);
+            Sentry.captureException(e);
+            k.go("menu");
         });
     });
 
