@@ -15,6 +15,7 @@ Sentry.init({
     }),
     Sentry.feedbackIntegration({
         colorScheme: 'light'
+
     }),
     // The following is all you need to enable canvas recording with Replay
     Sentry.replayCanvasIntegration({ preserveDrawingBuffer: true }),
@@ -633,7 +634,7 @@ k.scene("game", () => {
         ]));
     }
 
-    // line to show movement limits for p1
+    // line to show movement limits for players
     k.add([
         k.rect(3, k.height() - 120),
         k.pos(70, 60),
@@ -719,12 +720,16 @@ k.scene("game", () => {
 
     player.onButtonDown("up", () => {
         player.move(0, -200);
+        if (player.pos.y < 60) player.pos.y = 60;
+        if (player.pos.y > k.height() - 60) player.pos.y = k.height() - 60;
         ws.send(JSON.stringify(["move", player.pos.toArray()]));
         angleGun(gun, player);
     });
 
     player.onButtonDown("down", () => {
         player.move(0, 200);
+        if (player.pos.y < 60) player.pos.y = 60;
+        if (player.pos.y > k.height() - 60) player.pos.y = k.height() - 60;
         ws.send(JSON.stringify(["move", player.pos.toArray()]));
         angleGun(gun, player);
     });
@@ -785,6 +790,11 @@ k.scene("game", () => {
         }
         if (type === "move") {
             altplayer.pos = data[0];
+            // Anti-cheat
+            if (data[0] > k.height() - 60 || data[0] < 60) {
+                k.debug.error("Cheating detected");
+                Sentry.addBreadcrumb("Cheating detected");
+            }
         }
         if (type === "angle") {
             angleGun(altgun, altplayer, data[0], false);
@@ -802,6 +812,12 @@ k.scene("game", () => {
                 k.rect(12, 5, { radius: 2 }),
                 "bullet-remote",
             ]);
+            // Anti-cheat
+            if (b.pos.distance(altplayer.pos) > 100) {
+                b.destroy();
+                k.debug.error("Cheating detected");
+                Sentry.addBreadcrumb("Cheating detected");
+            }
         }
         if (type === "chat") {
             // Add to chat
@@ -811,6 +827,8 @@ k.scene("game", () => {
             console.log("init", data[1]);
             player.pos = data[1] == "left" ? k.vec2(70, k.height() / 2) : k.vec2(k.width() - 70, k.height() / 2);
             altplayer.pos = data[1] == "left" ? k.vec2(k.width() - 70, k.height() / 2) : k.vec2(70, k.height() / 2);
+            player.flipX = data[1] == "left";
+            altplayer.flipX = data[1] == "right";
             player.side = data[1];
             altplayer.side = data[1] == "left" ? "right" : "left";
         }
