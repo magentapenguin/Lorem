@@ -813,7 +813,7 @@ k.scene("game", () => {
                 "bullet-remote",
             ]);
             // Anti-cheat
-            if (b.pos.distance(altplayer.pos) > 100) {
+            if (b.pos.dist(altplayer.pos) > 100) {
                 b.destroy();
                 k.debug.error("Cheating detected");
                 Sentry.addBreadcrumb("Cheating detected");
