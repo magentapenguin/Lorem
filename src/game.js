@@ -25,7 +25,7 @@ Sentry.init({
 
 /** @type {PartySocket} */
 var ws;
-const HOST = process.env.PARTYKIT_HOST;
+const HOST = location.host;
 
 
 function wsinit() {
