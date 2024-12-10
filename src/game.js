@@ -25,7 +25,7 @@ Sentry.init({
 
 /** @type {PartySocket} */
 var ws;
-const HOST = location.host;//"https://lorem-ipsum-game.magentapenguin.partykit.dev";
+const HOST = process.env.PARTYKIT_HOST;
 
 
 function wsinit() {
